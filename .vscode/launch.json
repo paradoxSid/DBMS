@@ -1,0 +1,11 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "FacultyPortal (Launch)",
+            "request": "launch",
+            "mainClass": "com.sid.ActivityMain",
+            "projectName": "DBMS"
+        },
+    ]
+}
