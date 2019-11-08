@@ -93,8 +93,26 @@ public class ConnectToDB {
                             .append("name", name)
                             .append("d_id", dName)
                             .append("position", position)
-                            .append("leaves", 5)
-                            .append("extra", new Document());
+                            .append("leaves", 5);
+        Document extra = new Document().append("About Me", "")
+                            .append("Skill Set", "");
+        Document work  =  new Document().append("EmployeeID", "")
+                            .append("Department", dName)
+                            .append("HOD Name", "")
+                            .append("Title", "")
+                            .append("Office", "")
+                            .append("Date of joining", "")
+                            .append("Employee Status", "Active")
+                            .append("Date of joining", "");
+        extra.append("Work", work);
+        Document personal  =  new Document().append("Mobile Phone", "")
+                            .append("Email", "")
+                            .append("Birth Date", "")
+                            .append("Age", "")
+                            .append("Address", "")
+                            .append("Gender", "");
+        extra.append("Personal", personal);
+        insert.append("extra", extra);
         collectionFaculty.insertOne(insert);
         List<Document> inserted = collectionFaculty.find(insert).into(new ArrayList<Document>());
         return inserted.get(0);

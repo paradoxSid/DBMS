@@ -29,57 +29,32 @@ import org.bson.Document;
 
 public class FacultyPage {
     public JPanel page = new JPanel();
-    SpringLayout layout = new SpringLayout();
-    Document facDoc;
-    JTextArea lastLabel = null;
+    public static Document facDoc;
     JButton logoutButton;
 
     public FacultyPage(Document doc) {
-        page.setLayout(layout);
+        page.setLayout(new BoxLayout(page, BoxLayout.Y_AXIS));
         facDoc = doc;
 
-        JButton leaveButton = new JButton("Leave Application / Stauts");
-        JButton addButton = new JButton("Add Field");
-        JLabel name = new JLabel(doc.getString("name"));
-        JTextArea department = new JTextArea(doc.getString("position") + ", " + doc.getString("d_id") + " department");
-        department.setEditable(false);
-        department.setCursor(null);
-        department.setOpaque(false);
-        department.setFocusable(false);
-        lastLabel = department;
-
-        setExtras();
+        JPanel line = new JPanel();
+        line.setLayout(new BoxLayout(line, BoxLayout.X_AXIS));
+        JButton profileButton = new JButton("Profile");
+        line.add(profileButton);
+        
+        JButton leaveButton = new JButton("Leave");
+        line.add(leaveButton);
 
         logoutButton = new JButton("Logout");
+        line.add(logoutButton);
+        page.add(line);
 
-        name.setFont(new Font(name.getFont().getName(), Font.BOLD, name.getFont().getSize() + 10));
-        department.setFont(new Font(department.getFont().getName(), Font.BOLD, department.getFont().getSize()));
-
-        layout.putConstraint(SpringLayout.WEST, leaveButton, 5, SpringLayout.WEST, page);
-        layout.putConstraint(SpringLayout.NORTH, leaveButton, 5, SpringLayout.NORTH, page);
-        
-        layout.putConstraint(SpringLayout.WEST, addButton, 5, SpringLayout.EAST, leaveButton);
-        layout.putConstraint(SpringLayout.NORTH, addButton, 5, SpringLayout.NORTH, page);
-
-        layout.putConstraint(SpringLayout.WEST, name, 5, SpringLayout.WEST, page);
-        layout.putConstraint(SpringLayout.NORTH, name, 5, SpringLayout.SOUTH, leaveButton);
-
-        layout.putConstraint(SpringLayout.WEST, department, 5, SpringLayout.WEST, page);
-        layout.putConstraint(SpringLayout.NORTH, department, 5, SpringLayout.SOUTH, name);
-
-        layout.putConstraint(SpringLayout.WEST, logoutButton, 5, SpringLayout.WEST, page);
-        layout.putConstraint(SpringLayout.NORTH, logoutButton, 5, SpringLayout.SOUTH, lastLabel);
+        JPanel pro = setUpFacultyProfile();
+        page.add(pro);
 
         leaveButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 // LeavePage leavePage = new LeavePage(facDoc);
                 // setActivity(leavePage.page);
-            }
-        });
-        
-        addButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                createJOptionPane("", "");
             }
         });
 
@@ -89,38 +64,108 @@ public class FacultyPage {
                 setActivity(null);
             }
         });
-        page.add(leaveButton);
-        page.add(addButton);
-        page.add(name);
-        page.add(department);
-        page.add(logoutButton);
+        
     }
 
-    void createJOptionPane(String sHeading, String sDetails) {
-        JTextField newHeading = new JTextField(5);
-        JTextArea newDetails = new JTextArea(15, 50);
+    JPanel setUpFacultyProfile(){
+        JPanel profile = new JPanel();
+        profile.setLayout(new BoxLayout(profile, BoxLayout.Y_AXIS));
 
-        newHeading.setText(sHeading);
-        newDetails.setText(sDetails);
+        JLabel name = new JLabel(facDoc.getString("name"));
+        name.setFont(new Font(name.getFont().getName(), Font.BOLD, name.getFont().getSize() + 10));
+        profile.add(name);
 
-        JScrollPane scrollPane = new JScrollPane(newDetails);
+        JButton editButton = null;
+        try {
+            editButton = new JButton(new ImageIcon(ImageIO.read(new File("src/R/drawable/edit.png"))
+                    .getScaledInstance(15, 15, java.awt.Image.SCALE_SMOOTH)));
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        editButton.setOpaque(false);
+        editButton.setContentAreaFilled(false);
+        editButton.setBorderPainted(false);
+        editButton.setForeground(Color.BLUE);
+        profile.add(editButton);
 
-        JPanel newFac = new JPanel();
-        newFac.setLayout(new BoxLayout(newFac, BoxLayout.Y_AXIS));
-        newFac.add(new JLabel("Heading: *", JLabel.LEFT));
-        newFac.add(newHeading);
-        newFac.add(new JLabel("Details: *", JLabel.LEFT));
-        newFac.add(scrollPane);
+        JTextArea department = new JTextArea(facDoc.getString("position") + ", " + facDoc.getString("d_id") + " department");
+        department.setEditable(false);
+        department.setCursor(null);
+        department.setOpaque(false);
+        department.setFocusable(false);
+        department.setFont(new Font(department.getFont().getName(), Font.BOLD, department.getFont().getSize()));
+        profile.add(department);
 
-        int result = JOptionPane.showConfirmDialog(page, newFac, "Please enter the followings",
+        setExtras(profile);
+        
+        editButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                createJOptionPane();
+            }
+        });
+        return profile;
+    }
+
+    void createJOptionPane() {
+        JTextArea textAboutMe = new JTextArea(5, 50);
+        JScrollPane aboutMe = new JScrollPane(textAboutMe);
+        JTextArea textSkillset = new JTextArea(5, 50);
+        JScrollPane skillset = new JScrollPane(textSkillset);
+        JTextArea textOffice = new JTextArea(1, 50);
+        JScrollPane office = new JScrollPane(textOffice);
+        JTextField phone = new JTextField(5);
+        JTextField email = new JTextField(5);
+        JTextField birth = new JTextField(5);
+        JTextArea textAdd = new JTextArea(1, 50);
+        JScrollPane address = new JScrollPane(textAdd);
+        JTextField gender = new JTextField(5);
+        JPanel editFac = new JPanel();
+
+        Document extrasDoc = (Document) facDoc.get("extra");
+        textAboutMe.setText(extrasDoc.getString("About Me"));
+        textSkillset.setText(extrasDoc.getString("Skill Set"));
+        textOffice.setText(((Document)extrasDoc.get("Work")).getString("Office"));
+        phone.setText(((Document)extrasDoc.get("Personal")).getString("Mobile Phone"));
+        email.setText(((Document)extrasDoc.get("Personal")).getString("Email"));
+        birth.setText(((Document)extrasDoc.get("Personal")).getString("Birth Date"));
+        textAdd.setText(((Document)extrasDoc.get("Personal")).getString("Address"));
+        gender.setText(((Document)extrasDoc.get("Personal")).getString("Gender"));
+
+        editFac.setLayout(new BoxLayout(editFac, BoxLayout.Y_AXIS));
+        editFac.add(new JLabel("About Me: *", JLabel.LEFT));
+        editFac.add(aboutMe);
+        editFac.add(new JLabel("Skill Set: *", JLabel.LEFT));
+        editFac.add(skillset);
+        editFac.add(new JLabel("Office address: *", JLabel.LEFT));
+        editFac.add(office);
+        editFac.add(new JLabel("Moblie Phone: *", JLabel.LEFT));
+        editFac.add(phone);
+        editFac.add(new JLabel("Email: *", JLabel.LEFT));
+        editFac.add(email);
+        editFac.add(new JLabel("Birthday: *", JLabel.LEFT));
+        editFac.add(birth);
+        editFac.add(new JLabel("Home Address: *", JLabel.LEFT));
+        editFac.add(address);
+        editFac.add(new JLabel("Gender: *", JLabel.LEFT));
+        editFac.add(gender);
+
+        int result = JOptionPane.showConfirmDialog(page, editFac, "Please enter the followings",
                 JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
-            if (newHeading.getText().isEmpty() || newDetails.getText().isEmpty())
+            if (textAboutMe.getText().isEmpty() || textSkillset.getText().isEmpty() || textOffice.getText().isEmpty()
+                    || phone.getText().isEmpty() || email.getText().isEmpty() || birth.getText().isEmpty()
+                    || textAdd.getText().isEmpty() || gender.getText().isEmpty())
                 JOptionPane.showMessageDialog(page, "All the fields must be Filled. Try Again");
             else {
                 Document extras = (Document) facDoc.get("extra");
-                extras.remove(sHeading);
-                extras.put(newHeading.getText(), newDetails.getText());
+                extras.put("About Me", textAboutMe.getText());
+                extras.put("Skill Set", textSkillset.getText());
+                ((Document)extras.get("Work")).put("Office", textOffice.getText());
+                ((Document)extras.get("Personal")).put("Mobile Phone", phone.getText());
+                ((Document)extras.get("Personal")).put("Email", email.getText());
+                ((Document)extras.get("Personal")).put("Birth Date", birth.getText());
+                ((Document)extras.get("Personal")).put("Address", textAdd.getText());
+                ((Document)extras.get("Personal")).put("Gender", gender.getText());
                 facDoc.put("extra", extras);
                 db.upsertFaculty(facDoc);
                 logoutButton.doClick();
@@ -129,76 +174,96 @@ public class FacultyPage {
         }
     }
 
-    void setExtras() {
+    void setExtras(JPanel profile) {
         Document extras = (Document) facDoc.get("extra");
-        List<String> keys = new ArrayList<>(extras.keySet());
-        for (String st : keys) {
-            JLabel heading = new JLabel(st, JLabel.CENTER);
-            JButton edit = null;
-            JButton delete = null;
-            try {
-                edit = new JButton(new ImageIcon(ImageIO.read(new File("src/R/drawable/edit.png")).getScaledInstance(15,
-                        15, java.awt.Image.SCALE_SMOOTH)));
-                delete = new JButton(new ImageIcon(ImageIO.read(new File("src/R/drawable/delete.png"))
-                        .getScaledInstance(15, 15, java.awt.Image.SCALE_SMOOTH)));
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            }
 
-            JTextArea details = new JTextArea(extras.getString(st));
-            heading.setFont(new Font(heading.getFont().getName(), Font.BOLD, heading.getFont().getSize() + 5));
-            edit.setOpaque(false);
-            edit.setContentAreaFilled(false);
-            edit.setBorderPainted(false);
-            edit.setForeground(Color.BLUE);
-            edit.setActionCommand(st + "@#" + extras.getString(st));
-            delete.setOpaque(false);
-            delete.setContentAreaFilled(false);
-            delete.setBorderPainted(false);
-            delete.setForeground(Color.BLUE);
-            delete.setActionCommand(st);
-            details.setEditable(false);
-            details.setCursor(null);
-            details.setOpaque(false);
-            details.setFocusable(false);
-            details.setLineWrap(true);
-            details.setWrapStyleWord(true);
-            details.setColumns(150);
+        JLabel headingAboutMe = new JLabel("About Me");
+        headingAboutMe.setFont(
+                new Font(headingAboutMe.getFont().getName(), Font.BOLD, headingAboutMe.getFont().getSize() + 5));
+        profile.add(headingAboutMe);
 
-            delete.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    if (JOptionPane.showConfirmDialog(page,
-                            "Are you sure you want to delete " + e.getActionCommand() + "?", "WARNING",
-                            JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-                        Document extras = (Document) facDoc.get("extra");
-                        extras.remove(e.getActionCommand());
-                        facDoc.put("extra", extras);
-                        db.upsertFaculty(facDoc);
-                        logoutButton.doClick();
-                        loginButton.doClick();
-                    }
-                }
-            });
-            edit.addActionListener(new ActionListener() {
-                public void actionPerformed(ActionEvent e) {
-                    String[] s = e.getActionCommand().split("@#");
-                    createJOptionPane(s[0], s[1]);
-                }
-            });
+        JTextArea detailsAboutMe = new JTextArea(extras.getString("About Me"));
+        detailsAboutMe.setEditable(false);
+        detailsAboutMe.setCursor(null);
+        detailsAboutMe.setOpaque(false);
+        detailsAboutMe.setFocusable(false);
+        detailsAboutMe.setLineWrap(true);
+        detailsAboutMe.setWrapStyleWord(true);
+        detailsAboutMe.setColumns(150);
+        profile.add(detailsAboutMe);
+        
+        JLabel headingSkillSet = new JLabel("Skill Set");
+        headingSkillSet.setFont(
+                new Font(headingSkillSet.getFont().getName(), Font.BOLD, headingSkillSet.getFont().getSize() + 5));
+        profile.add(headingSkillSet);
 
-            layout.putConstraint(SpringLayout.WEST, heading, 5, SpringLayout.WEST, page);
-            layout.putConstraint(SpringLayout.NORTH, heading, 5, SpringLayout.SOUTH, lastLabel);
-            layout.putConstraint(SpringLayout.WEST, edit, 5, SpringLayout.EAST, heading);
-            layout.putConstraint(SpringLayout.NORTH, edit, 5, SpringLayout.SOUTH, lastLabel);
-            layout.putConstraint(SpringLayout.WEST, delete, 5, SpringLayout.EAST, edit);
-            layout.putConstraint(SpringLayout.NORTH, delete, 5, SpringLayout.SOUTH, lastLabel);
-            layout.putConstraint(SpringLayout.WEST, details, 5, SpringLayout.WEST, page);
-            layout.putConstraint(SpringLayout.NORTH, details, 5, SpringLayout.SOUTH, heading);
-            lastLabel = details;
-            page.add(heading);
-            page.add(edit);
-            page.add(delete);
-            page.add(details);
+        JTextArea detailsSkillSet = new JTextArea(extras.getString("Skill Set"));
+        detailsSkillSet.setEditable(false);
+        detailsSkillSet.setCursor(null);
+        detailsSkillSet.setOpaque(false);
+        detailsSkillSet.setFocusable(false);
+        detailsSkillSet.setLineWrap(true);
+        detailsSkillSet.setWrapStyleWord(true);
+        detailsSkillSet.setColumns(150);
+        profile.add(detailsSkillSet);
+        
+        JTextArea headingWork = new JTextArea("Work");
+        headingWork.setEditable(false);
+        headingWork.setCursor(null);
+        headingWork.setOpaque(false);
+        headingWork.setFocusable(false);
+        headingWork.setLineWrap(true);
+        headingWork.setWrapStyleWord(true);
+        headingWork.setColumns(150);
+        headingWork.setFont(new Font(headingWork.getFont().getName(), Font.BOLD, headingWork.getFont().getSize() + 5));
+        profile.add(headingWork);
+
+        Document workDoc = (Document) extras.get("Work");
+        List<String> workKeys = new ArrayList<>(workDoc.keySet());
+        for (String key : workKeys) {
+            JLabel work1 = new JLabel(key, JLabel.CENTER);
+            work1.setForeground(Color.LIGHT_GRAY);
+            profile.add(work1);
+
+            JTextArea work2 = new JTextArea(workDoc.getString(key));
+            work2.setEditable(false);
+            work2.setCursor(null);
+            work2.setOpaque(false);
+            work2.setFocusable(false);
+            work2.setLineWrap(true);
+            work2.setWrapStyleWord(true);
+            work2.setColumns(150);
+            profile.add(work2);
+        }
+
+        JTextArea headingPersonal = new JTextArea("Personal");
+        headingPersonal.setEditable(false);
+        headingPersonal.setCursor(null);
+        headingPersonal.setOpaque(false);
+        headingPersonal.setFocusable(false);
+        headingPersonal.setLineWrap(true);
+        headingPersonal.setWrapStyleWord(true);
+        headingPersonal.setColumns(150);
+        headingPersonal.setFont(
+                new Font(headingPersonal.getFont().getName(), Font.BOLD, headingPersonal.getFont().getSize() + 5));
+        profile.add(headingPersonal);
+
+        Document personalDoc = (Document) extras.get("Personal");
+        List<String> personalKeys = new ArrayList<>(personalDoc.keySet());
+        for (String key : personalKeys) {
+            JLabel personal1 = new JLabel(key, JLabel.CENTER);
+            personal1.setForeground(Color.LIGHT_GRAY);
+            profile.add(personal1);
+
+            JTextArea personal2 = new JTextArea(personalDoc.getString(key));
+            personal2.setEditable(false);
+            personal2.setCursor(null);
+            personal2.setOpaque(false);
+            personal2.setFocusable(false);
+            personal2.setLineWrap(true);
+            personal2.setWrapStyleWord(true);
+            personal2.setColumns(150);
+            profile.add(personal2);
         }
     }
 }

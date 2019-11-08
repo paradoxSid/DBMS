@@ -13,7 +13,7 @@ public class ActivityMain {
 
     public static void main(String[] args) {
         mainFrame = new JFrame("Faculty Portal");
-        mainFrame.setSize(400, 400);
+        mainFrame.setSize(600, 800);
         mainFrame.setLocationRelativeTo(null);
         mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
