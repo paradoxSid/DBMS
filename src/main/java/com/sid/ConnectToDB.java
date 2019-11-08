@@ -1,13 +1,13 @@
 package com.sid;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Updates;
 
 import org.bson.Document;
 

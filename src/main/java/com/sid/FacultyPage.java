@@ -29,32 +29,31 @@ import org.bson.Document;
 
 public class FacultyPage {
     public JPanel page = new JPanel();
+    SpringLayout layout;
     public static Document facDoc;
-    JButton logoutButton;
+    JButton leaveButton, logoutButton;
 
     public FacultyPage(Document doc) {
-        page.setLayout(new BoxLayout(page, BoxLayout.Y_AXIS));
+        layout = new SpringLayout();
+        page.setLayout(layout);
         facDoc = doc;
 
-        JPanel line = new JPanel();
-        line.setLayout(new BoxLayout(line, BoxLayout.X_AXIS));
-        JButton profileButton = new JButton("Profile");
-        line.add(profileButton);
-        
-        JButton leaveButton = new JButton("Leave");
-        line.add(leaveButton);
+        leaveButton = new JButton("Leave");
+        layout.putConstraint(SpringLayout.WEST, leaveButton, 5, SpringLayout.WEST, page);
+        layout.putConstraint(SpringLayout.NORTH, leaveButton, 5, SpringLayout.NORTH, page);
+        page.add(leaveButton);
 
         logoutButton = new JButton("Logout");
-        line.add(logoutButton);
-        page.add(line);
+        layout.putConstraint(SpringLayout.WEST, logoutButton, 5, SpringLayout.EAST, leaveButton);
+        layout.putConstraint(SpringLayout.NORTH, logoutButton, 5, SpringLayout.NORTH, page);
+        page.add(logoutButton);
 
-        JPanel pro = setUpFacultyProfile();
-        page.add(pro);
+        setUpFacultyProfile();
 
         leaveButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // LeavePage leavePage = new LeavePage(facDoc);
-                // setActivity(leavePage.page);
+                LeavePage leavePage = new LeavePage(facDoc);
+                setActivity(leavePage.page);
             }
         });
 
@@ -64,16 +63,15 @@ public class FacultyPage {
                 setActivity(null);
             }
         });
-        
+
     }
 
-    JPanel setUpFacultyProfile(){
-        JPanel profile = new JPanel();
-        profile.setLayout(new BoxLayout(profile, BoxLayout.Y_AXIS));
-
+    void setUpFacultyProfile() {
         JLabel name = new JLabel(facDoc.getString("name"));
         name.setFont(new Font(name.getFont().getName(), Font.BOLD, name.getFont().getSize() + 10));
-        profile.add(name);
+        layout.putConstraint(SpringLayout.WEST, name, 5, SpringLayout.WEST, page);
+        layout.putConstraint(SpringLayout.NORTH, name, 5, SpringLayout.SOUTH, leaveButton);
+        page.add(name);
 
         JButton editButton = null;
         try {
@@ -86,24 +84,140 @@ public class FacultyPage {
         editButton.setContentAreaFilled(false);
         editButton.setBorderPainted(false);
         editButton.setForeground(Color.BLUE);
-        profile.add(editButton);
+        layout.putConstraint(SpringLayout.WEST, editButton, 5, SpringLayout.EAST, name);
+        layout.putConstraint(SpringLayout.NORTH, editButton, 5, SpringLayout.SOUTH, leaveButton);
+        page.add(editButton);
 
-        JTextArea department = new JTextArea(facDoc.getString("position") + ", " + facDoc.getString("d_id") + " department");
+        JTextArea department = new JTextArea(
+                facDoc.getString("position") + ", " + facDoc.getString("d_id") + " department");
         department.setEditable(false);
         department.setCursor(null);
         department.setOpaque(false);
         department.setFocusable(false);
         department.setFont(new Font(department.getFont().getName(), Font.BOLD, department.getFont().getSize()));
-        profile.add(department);
+        layout.putConstraint(SpringLayout.WEST, department, 5, SpringLayout.WEST, page);
+        layout.putConstraint(SpringLayout.NORTH, department, 5, SpringLayout.SOUTH, editButton);
+        page.add(department);
 
-        setExtras(profile);
+        Document extras = (Document) facDoc.get("extra");
+        JLabel headingAboutMe = new JLabel("About Me");
+        headingAboutMe.setFont(
+                new Font(headingAboutMe.getFont().getName(), Font.BOLD, headingAboutMe.getFont().getSize() + 5));
+        layout.putConstraint(SpringLayout.WEST, headingAboutMe, 5, SpringLayout.WEST, page);
+        layout.putConstraint(SpringLayout.NORTH, headingAboutMe, 5, SpringLayout.SOUTH, department);
+        page.add(headingAboutMe);
+
+        JTextArea detailsAboutMe = new JTextArea(extras.getString("About Me"));
+        detailsAboutMe.setEditable(false);
+        detailsAboutMe.setCursor(null);
+        detailsAboutMe.setOpaque(false);
+        detailsAboutMe.setFocusable(false);
+        detailsAboutMe.setLineWrap(true);
+        detailsAboutMe.setWrapStyleWord(true);
+        detailsAboutMe.setColumns(150);
+        layout.putConstraint(SpringLayout.WEST, detailsAboutMe, 5, SpringLayout.WEST, page);
+        layout.putConstraint(SpringLayout.NORTH, detailsAboutMe, 5, SpringLayout.SOUTH, headingAboutMe);
+        page.add(detailsAboutMe);
+
+        JLabel headingSkillSet = new JLabel("Skill Set");
+        headingSkillSet.setFont(
+                new Font(headingSkillSet.getFont().getName(), Font.BOLD, headingSkillSet.getFont().getSize() + 5));
+        layout.putConstraint(SpringLayout.WEST, headingSkillSet, 5, SpringLayout.WEST, page);
+        layout.putConstraint(SpringLayout.NORTH, headingSkillSet, 5, SpringLayout.SOUTH, detailsAboutMe);
+        page.add(headingSkillSet);
+
+        JTextArea detailsSkillSet = new JTextArea(extras.getString("Skill Set"));
+        detailsSkillSet.setEditable(false);
+        detailsSkillSet.setCursor(null);
+        detailsSkillSet.setOpaque(false);
+        detailsSkillSet.setFocusable(false);
+        detailsSkillSet.setLineWrap(true);
+        detailsSkillSet.setWrapStyleWord(true);
+        detailsSkillSet.setColumns(150);
+        layout.putConstraint(SpringLayout.WEST, detailsSkillSet, 5, SpringLayout.WEST, page);
+        layout.putConstraint(SpringLayout.NORTH, detailsSkillSet, 5, SpringLayout.SOUTH, headingSkillSet);
+        page.add(detailsSkillSet);
+
+        JTextArea headingWork = new JTextArea("Work");
+        headingWork.setEditable(false);
+        headingWork.setCursor(null);
+        headingWork.setOpaque(false);
+        headingWork.setFocusable(false);
+        headingWork.setLineWrap(true);
+        headingWork.setWrapStyleWord(true);
+        headingWork.setColumns(150);
+        headingWork.setFont(new Font(headingWork.getFont().getName(), Font.BOLD, headingWork.getFont().getSize() + 5));
+        layout.putConstraint(SpringLayout.WEST, headingWork, 5, SpringLayout.WEST, page);
+        layout.putConstraint(SpringLayout.NORTH, headingWork, 5, SpringLayout.SOUTH, detailsSkillSet);
+        page.add(headingWork);
+
+        JTextArea lastArea = headingWork;
+        Document workDoc = (Document) extras.get("Work");
+        List<String> workKeys = new ArrayList<>(workDoc.keySet());
+        for (String key : workKeys) {
+            JLabel work1 = new JLabel(key, JLabel.CENTER);
+            work1.setForeground(Color.LIGHT_GRAY);
+            layout.putConstraint(SpringLayout.WEST, work1, 5, SpringLayout.WEST, page);
+            layout.putConstraint(SpringLayout.NORTH, work1, 5, SpringLayout.SOUTH, lastArea);
+            page.add(work1);
+
+            JTextArea work2 = new JTextArea(workDoc.getString(key));
+            work2.setEditable(false);
+            work2.setCursor(null);
+            work2.setOpaque(false);
+            work2.setFocusable(false);
+            work2.setLineWrap(true);
+            work2.setWrapStyleWord(true);
+            work2.setColumns(150);
+            layout.putConstraint(SpringLayout.WEST, work2, 5, SpringLayout.EAST, work1);
+            layout.putConstraint(SpringLayout.NORTH, work2, 5, SpringLayout.SOUTH, lastArea);
+            page.add(work2);
+            lastArea = work2;
+        }
+
+        JTextArea headingPersonal = new JTextArea("Personal");
+        headingPersonal.setEditable(false);
+        headingPersonal.setCursor(null);
+        headingPersonal.setOpaque(false);
+        headingPersonal.setFocusable(false);
+        headingPersonal.setLineWrap(true);
+        headingPersonal.setWrapStyleWord(true);
+        headingPersonal.setColumns(150);
+        headingPersonal.setFont(
+                new Font(headingPersonal.getFont().getName(), Font.BOLD, headingPersonal.getFont().getSize() + 5));
+        layout.putConstraint(SpringLayout.WEST, headingPersonal, 5, SpringLayout.WEST, page);
+        layout.putConstraint(SpringLayout.NORTH, headingPersonal, 5, SpringLayout.SOUTH, lastArea);
+        page.add(headingPersonal);
+        lastArea = headingPersonal;
+
+        Document personalDoc = (Document) extras.get("Personal");
+        List<String> personalKeys = new ArrayList<>(personalDoc.keySet());
+        for (String key : personalKeys) {
+            JLabel personal1 = new JLabel(key, JLabel.CENTER);
+            personal1.setForeground(Color.LIGHT_GRAY);
+            layout.putConstraint(SpringLayout.WEST, personal1, 5, SpringLayout.WEST, page);
+            layout.putConstraint(SpringLayout.NORTH, personal1, 5, SpringLayout.SOUTH, lastArea);
+            page.add(personal1);
+
+            JTextArea personal2 = new JTextArea(personalDoc.getString(key));
+            personal2.setEditable(false);
+            personal2.setCursor(null);
+            personal2.setOpaque(false);
+            personal2.setFocusable(false);
+            personal2.setLineWrap(true);
+            personal2.setWrapStyleWord(true);
+            personal2.setColumns(150);
+            layout.putConstraint(SpringLayout.WEST, personal2, 5, SpringLayout.EAST, personal1);
+            layout.putConstraint(SpringLayout.NORTH, personal2, 5, SpringLayout.SOUTH, lastArea);
+            page.add(personal2);
+            lastArea = personal2;
+        }
         
         editButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 createJOptionPane();
             }
         });
-        return profile;
     }
 
     void createJOptionPane() {
@@ -124,14 +238,14 @@ public class FacultyPage {
         Document extrasDoc = (Document) facDoc.get("extra");
         textAboutMe.setText(extrasDoc.getString("About Me"));
         textSkillset.setText(extrasDoc.getString("Skill Set"));
-        textOffice.setText(((Document)extrasDoc.get("Work")).getString("Office"));
-        phone.setText(((Document)extrasDoc.get("Personal")).getString("Mobile Phone"));
-        email.setText(((Document)extrasDoc.get("Personal")).getString("Email"));
-        birth.setText(((Document)extrasDoc.get("Personal")).getString("Birth Date"));
-        textAdd.setText(((Document)extrasDoc.get("Personal")).getString("Address"));
-        gender.setText(((Document)extrasDoc.get("Personal")).getString("Gender"));
+        textOffice.setText(((Document) extrasDoc.get("Work")).getString("Office"));
+        phone.setText(((Document) extrasDoc.get("Personal")).getString("Mobile Phone"));
+        email.setText(((Document) extrasDoc.get("Personal")).getString("Email"));
+        birth.setText(((Document) extrasDoc.get("Personal")).getString("Birth Date"));
+        textAdd.setText(((Document) extrasDoc.get("Personal")).getString("Address"));
+        gender.setText(((Document) extrasDoc.get("Personal")).getString("Gender"));
 
-        editFac.setLayout(new BoxLayout(editFac, BoxLayout.Y_AXIS));
+        editFac.setLayout(new BoxLayout(editFac, BoxLayout.PAGE_AXIS));
         editFac.add(new JLabel("About Me: *", JLabel.LEFT));
         editFac.add(aboutMe);
         editFac.add(new JLabel("Skill Set: *", JLabel.LEFT));
@@ -160,110 +274,17 @@ public class FacultyPage {
                 Document extras = (Document) facDoc.get("extra");
                 extras.put("About Me", textAboutMe.getText());
                 extras.put("Skill Set", textSkillset.getText());
-                ((Document)extras.get("Work")).put("Office", textOffice.getText());
-                ((Document)extras.get("Personal")).put("Mobile Phone", phone.getText());
-                ((Document)extras.get("Personal")).put("Email", email.getText());
-                ((Document)extras.get("Personal")).put("Birth Date", birth.getText());
-                ((Document)extras.get("Personal")).put("Address", textAdd.getText());
-                ((Document)extras.get("Personal")).put("Gender", gender.getText());
+                ((Document) extras.get("Work")).put("Office", textOffice.getText());
+                ((Document) extras.get("Personal")).put("Mobile Phone", phone.getText());
+                ((Document) extras.get("Personal")).put("Email", email.getText());
+                ((Document) extras.get("Personal")).put("Birth Date", birth.getText());
+                ((Document) extras.get("Personal")).put("Address", textAdd.getText());
+                ((Document) extras.get("Personal")).put("Gender", gender.getText());
                 facDoc.put("extra", extras);
                 db.upsertFaculty(facDoc);
                 logoutButton.doClick();
                 loginButton.doClick();
             }
-        }
-    }
-
-    void setExtras(JPanel profile) {
-        Document extras = (Document) facDoc.get("extra");
-
-        JLabel headingAboutMe = new JLabel("About Me");
-        headingAboutMe.setFont(
-                new Font(headingAboutMe.getFont().getName(), Font.BOLD, headingAboutMe.getFont().getSize() + 5));
-        profile.add(headingAboutMe);
-
-        JTextArea detailsAboutMe = new JTextArea(extras.getString("About Me"));
-        detailsAboutMe.setEditable(false);
-        detailsAboutMe.setCursor(null);
-        detailsAboutMe.setOpaque(false);
-        detailsAboutMe.setFocusable(false);
-        detailsAboutMe.setLineWrap(true);
-        detailsAboutMe.setWrapStyleWord(true);
-        detailsAboutMe.setColumns(150);
-        profile.add(detailsAboutMe);
-        
-        JLabel headingSkillSet = new JLabel("Skill Set");
-        headingSkillSet.setFont(
-                new Font(headingSkillSet.getFont().getName(), Font.BOLD, headingSkillSet.getFont().getSize() + 5));
-        profile.add(headingSkillSet);
-
-        JTextArea detailsSkillSet = new JTextArea(extras.getString("Skill Set"));
-        detailsSkillSet.setEditable(false);
-        detailsSkillSet.setCursor(null);
-        detailsSkillSet.setOpaque(false);
-        detailsSkillSet.setFocusable(false);
-        detailsSkillSet.setLineWrap(true);
-        detailsSkillSet.setWrapStyleWord(true);
-        detailsSkillSet.setColumns(150);
-        profile.add(detailsSkillSet);
-        
-        JTextArea headingWork = new JTextArea("Work");
-        headingWork.setEditable(false);
-        headingWork.setCursor(null);
-        headingWork.setOpaque(false);
-        headingWork.setFocusable(false);
-        headingWork.setLineWrap(true);
-        headingWork.setWrapStyleWord(true);
-        headingWork.setColumns(150);
-        headingWork.setFont(new Font(headingWork.getFont().getName(), Font.BOLD, headingWork.getFont().getSize() + 5));
-        profile.add(headingWork);
-
-        Document workDoc = (Document) extras.get("Work");
-        List<String> workKeys = new ArrayList<>(workDoc.keySet());
-        for (String key : workKeys) {
-            JLabel work1 = new JLabel(key, JLabel.CENTER);
-            work1.setForeground(Color.LIGHT_GRAY);
-            profile.add(work1);
-
-            JTextArea work2 = new JTextArea(workDoc.getString(key));
-            work2.setEditable(false);
-            work2.setCursor(null);
-            work2.setOpaque(false);
-            work2.setFocusable(false);
-            work2.setLineWrap(true);
-            work2.setWrapStyleWord(true);
-            work2.setColumns(150);
-            profile.add(work2);
-        }
-
-        JTextArea headingPersonal = new JTextArea("Personal");
-        headingPersonal.setEditable(false);
-        headingPersonal.setCursor(null);
-        headingPersonal.setOpaque(false);
-        headingPersonal.setFocusable(false);
-        headingPersonal.setLineWrap(true);
-        headingPersonal.setWrapStyleWord(true);
-        headingPersonal.setColumns(150);
-        headingPersonal.setFont(
-                new Font(headingPersonal.getFont().getName(), Font.BOLD, headingPersonal.getFont().getSize() + 5));
-        profile.add(headingPersonal);
-
-        Document personalDoc = (Document) extras.get("Personal");
-        List<String> personalKeys = new ArrayList<>(personalDoc.keySet());
-        for (String key : personalKeys) {
-            JLabel personal1 = new JLabel(key, JLabel.CENTER);
-            personal1.setForeground(Color.LIGHT_GRAY);
-            profile.add(personal1);
-
-            JTextArea personal2 = new JTextArea(personalDoc.getString(key));
-            personal2.setEditable(false);
-            personal2.setCursor(null);
-            personal2.setOpaque(false);
-            personal2.setFocusable(false);
-            personal2.setLineWrap(true);
-            personal2.setWrapStyleWord(true);
-            personal2.setColumns(150);
-            profile.add(personal2);
         }
     }
 }
