@@ -1,15 +1,21 @@
 package com.sid;
 
 import java.awt.GridLayout;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Stack;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import org.bson.Document;;
 
 public class ActivityMain {
     static JFrame mainFrame;
     static ConnectToDB db;
     static Stack<JPanel> stActivities;
+    static List<Document> depts;
+    static DateFormat df = new SimpleDateFormat("dd/MM/yy");
 
     public static void main(String[] args) {
         mainFrame = new JFrame("Faculty Portal");
@@ -22,6 +28,7 @@ public class ActivityMain {
         stActivities = new Stack<>();
 
         db = new ConnectToDB();
+        depts = db.findAllDepartments();
         LoginPage loginPage = new LoginPage();
         setActivity(loginPage.page);
 

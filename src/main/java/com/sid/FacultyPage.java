@@ -1,6 +1,8 @@
 package com.sid;
 
+import static com.sid.ActivityMain.df;
 import static com.sid.ActivityMain.db;
+import static com.sid.ActivityMain.depts;
 import static com.sid.ActivityMain.setActivity;
 import static com.sid.LoginPage.loginButton;
 
@@ -11,6 +13,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -161,7 +164,11 @@ public class FacultyPage {
             layout.putConstraint(SpringLayout.NORTH, work1, 5, SpringLayout.SOUTH, lastArea);
             page.add(work1);
 
-            JTextArea work2 = new JTextArea(workDoc.getString(key));
+            JTextArea work2 = new JTextArea();
+            if(key.equals("Date of joining"))
+                work2.setText(df.format((Date)workDoc.get("Date of joining")));
+            else
+                work2.setText(workDoc.getString(key));
             work2.setEditable(false);
             work2.setCursor(null);
             work2.setOpaque(false);
@@ -171,6 +178,16 @@ public class FacultyPage {
             work2.setColumns(150);
             layout.putConstraint(SpringLayout.WEST, work2, 5, SpringLayout.EAST, work1);
             layout.putConstraint(SpringLayout.NORTH, work2, 5, SpringLayout.SOUTH, lastArea);
+
+            if (key.equals("HOD ID")) {
+                for (Document doc : depts) {
+                    if (doc.getString("d_id").equals(facDoc.getString("d_id"))) {
+                        Document allhod = (Document) doc.get("hod");
+                        work2.setText(allhod.getString(String.valueOf(allhod.size() - 1)));
+                    }
+                }
+            }
+
             page.add(work2);
             lastArea = work2;
         }
@@ -212,7 +229,7 @@ public class FacultyPage {
             page.add(personal2);
             lastArea = personal2;
         }
-        
+
         editButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 createJOptionPane();

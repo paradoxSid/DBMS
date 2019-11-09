@@ -1,6 +1,7 @@
 package com.sid;
 
 import static com.sid.ActivityMain.db;
+import static com.sid.ActivityMain.depts;
 import static com.sid.ActivityMain.setActivity;
 
 import java.awt.Color;
@@ -28,7 +29,6 @@ import org.bson.Document;
 public class AdminPage {
     public JPanel page;
     SpringLayout layout;
-    List<Document> depts;
     public static List<Document> allFaculties;
     public static HashMap<String, List<Document>> faculties;
     JButton addDepartmentButton;
@@ -50,7 +50,6 @@ public class AdminPage {
         logoutButton.setBorderPainted(false);
         logoutButton.setForeground(Color.RED);
 
-        depts = db.findAllDepartments();
         setDepartmentNames(0);
         allFaculties = db.findAllFaculty();
         distributeFaculties(allFaculties);

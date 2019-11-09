@@ -1,8 +1,11 @@
 package com.sid;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import static com.sid.ActivityMain.df;
 
+import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoCollection;
@@ -96,14 +99,13 @@ public class ConnectToDB {
                             .append("leaves", 5);
         Document extra = new Document().append("About Me", "")
                             .append("Skill Set", "");
-        Document work  =  new Document().append("EmployeeID", "")
+        BasicDBObject work  =  new BasicDBObject().append("EmployeeID", id)
                             .append("Department", dName)
-                            .append("HOD Name", "")
-                            .append("Title", "")
+                            .append("HOD ID", "")
+                            .append("Title", position)
                             .append("Office", "")
-                            .append("Date of joining", "")
-                            .append("Employee Status", "Active")
-                            .append("Date of joining", "");
+                            .append("Date of joining", new Date())
+                            .append("Employee Status", "Active");
         extra.append("Work", work);
         Document personal  =  new Document().append("Mobile Phone", "")
                             .append("Email", "")
@@ -128,8 +130,9 @@ public class ConnectToDB {
         collectionFaculty.replaceOne(Filters.eq("f_id", doc.getString("f_id")), doc);
     }
 
-	public List<Document> findAllLeaves(String id) {
-		print("findAllLeaves");
-        return collectionLeaves.find(Filters.eq("f_id", id)).sort(new Document("Request Date", 1)).into(new ArrayList<Document>());
-	}
+    public List<Document> findAllLeaves(String id) {
+        print("findAllLeaves");
+        return collectionLeaves.find(Filters.eq("f_id", id)).sort(new Document("Request Date", 1))
+                .into(new ArrayList<Document>());
+    }
 }
