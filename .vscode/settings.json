@@ -1,3 +1,6 @@
 {
-    "java.configuration.updateBuildConfiguration": "automatic"
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "maven.view": "flat",
+    "java.dependency.syncWithFolderExplorer": true,
+    "java.dependency.packagePresentation": "flat"
 }

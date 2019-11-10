@@ -13,6 +13,7 @@ import org.bson.Document;;
 public class ActivityMain {
     static JFrame mainFrame;
     static ConnectToDB db;
+    static ConnectToPostgres leavesDb;
     static Stack<JPanel> stActivities;
     static List<Document> depts;
     static DateFormat df = new SimpleDateFormat("dd/MM/yy");
@@ -29,6 +30,7 @@ public class ActivityMain {
 
         db = new ConnectToDB();
         depts = db.findAllDepartments();
+        leavesDb = new ConnectToPostgres();
         LoginPage loginPage = new LoginPage();
         setActivity(loginPage.page);
 

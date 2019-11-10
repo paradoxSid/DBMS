@@ -3,7 +3,6 @@ package com.sid;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import static com.sid.ActivityMain.df;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;

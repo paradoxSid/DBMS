@@ -18,11 +18,13 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -165,8 +167,8 @@ public class FacultyPage {
             page.add(work1);
 
             JTextArea work2 = new JTextArea();
-            if(key.equals("Date of joining"))
-                work2.setText(df.format((Date)workDoc.get("Date of joining")));
+            if (key.equals("Date of joining"))
+                work2.setText(df.format((Date) workDoc.get("Date of joining")));
             else
                 work2.setText(workDoc.getString(key));
             work2.setEditable(false);
@@ -249,7 +251,11 @@ public class FacultyPage {
         JTextField birth = new JTextField(5);
         JTextArea textAdd = new JTextArea(1, 50);
         JScrollPane address = new JScrollPane(textAdd);
-        JTextField gender = new JTextField(5);
+        JRadioButton male = new JRadioButton("Male");
+        JRadioButton female = new JRadioButton("Female");
+        ButtonGroup bg = new ButtonGroup();
+        bg.add(male);
+        bg.add(female);
         JPanel editFac = new JPanel();
 
         Document extrasDoc = (Document) facDoc.get("extra");
@@ -260,7 +266,10 @@ public class FacultyPage {
         email.setText(((Document) extrasDoc.get("Personal")).getString("Email"));
         birth.setText(((Document) extrasDoc.get("Personal")).getString("Birth Date"));
         textAdd.setText(((Document) extrasDoc.get("Personal")).getString("Address"));
-        gender.setText(((Document) extrasDoc.get("Personal")).getString("Gender"));
+        if(((Document) extrasDoc.get("Personal")).getString("Gender").equals("Male"))
+            male.setSelected(true);
+        else if(((Document) extrasDoc.get("Personal")).getString("Gender").equals("Female"))
+            female.setSelected(true);
 
         editFac.setLayout(new BoxLayout(editFac, BoxLayout.PAGE_AXIS));
         editFac.add(new JLabel("About Me: *", JLabel.LEFT));
@@ -278,14 +287,15 @@ public class FacultyPage {
         editFac.add(new JLabel("Home Address: *", JLabel.LEFT));
         editFac.add(address);
         editFac.add(new JLabel("Gender: *", JLabel.LEFT));
-        editFac.add(gender);
+        editFac.add(male);
+        editFac.add(female);
 
         int result = JOptionPane.showConfirmDialog(page, editFac, "Please enter the followings",
                 JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
             if (textAboutMe.getText().isEmpty() || textSkillset.getText().isEmpty() || textOffice.getText().isEmpty()
                     || phone.getText().isEmpty() || email.getText().isEmpty() || birth.getText().isEmpty()
-                    || textAdd.getText().isEmpty() || gender.getText().isEmpty())
+                    || textAdd.getText().isEmpty() || (!male.isSelected() && !female.isSelected()))
                 JOptionPane.showMessageDialog(page, "All the fields must be Filled. Try Again");
             else {
                 Document extras = (Document) facDoc.get("extra");
@@ -296,7 +306,10 @@ public class FacultyPage {
                 ((Document) extras.get("Personal")).put("Email", email.getText());
                 ((Document) extras.get("Personal")).put("Birth Date", birth.getText());
                 ((Document) extras.get("Personal")).put("Address", textAdd.getText());
-                ((Document) extras.get("Personal")).put("Gender", gender.getText());
+                if(male.isSelected())
+                    ((Document) extras.get("Personal")).put("Gender", "Male");
+                else
+                    ((Document) extras.get("Personal")).put("Gender", "Female");
                 facDoc.put("extra", extras);
                 db.upsertFaculty(facDoc);
                 logoutButton.doClick();

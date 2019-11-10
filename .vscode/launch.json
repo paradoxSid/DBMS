@@ -2,10 +2,24 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - CreatePostgres",
+            "request": "launch",
+            "mainClass": "com.sid.CreatePostgres",
+            "projectName": "DBMS"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - ConnectToPostgres",
+            "request": "launch",
+            "mainClass": "com.sid.ConnectToPostgres",
+            "projectName": "DBMS"
+        },
+        {
+            "type": "java",
             "name": "FacultyPortal (Launch)",
             "request": "launch",
             "mainClass": "com.sid.ActivityMain",
             "projectName": "DBMS"
-        },
+        }
     ]
 }
