@@ -1,6 +1,7 @@
 package com.sid;
 
 import static com.sid.ActivityMain.leavesDb;
+import static com.sid.ActivityMain.db;
 import static com.sid.ActivityMain.setActivity;
 import static com.sid.LeavePage.pendingLeaveRequest;
 
@@ -9,6 +10,10 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -121,16 +126,27 @@ public class ApproveLeavePage {
             lastLeave = dateAppliedHead;
         }
         int i = index;
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         for (; i < pendingLeaveRequest.size(); i++) {
+            int nod = 0;
+            try {
+                nod = (int) (df.parse(pendingLeaveRequest.get(i).getString("to_date")).getTime()
+                        - df.parse(pendingLeaveRequest.get(i).getString("from_date")).getTime()) / 86400000 + 1;
+            } catch (ParseException e1) {
+                e1.printStackTrace();
+            }
+
             JButton lId = new JButton(pendingLeaveRequest.get(i).getString("l_id"));
             lId.setOpaque(false);
             lId.setContentAreaFilled(false);
             lId.setBorderPainted(false);
             lId.setForeground(Color.BLUE);
-            lId.setActionCommand(pendingLeaveRequest.get(i).getString("l_id"));
+            lId.setActionCommand(pendingLeaveRequest.get(i).getString("l_id") + " "
+                    + pendingLeaveRequest.get(i).getString("f_id") + " " + nod);
             lId.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    createJOptionPane(Integer.parseInt(e.getActionCommand()));
+                    String[] s = e.getActionCommand().split(" ");
+                    createJOptionPane(Integer.parseInt(s[0]), Integer.parseInt(s[1]), Integer.parseInt(s[2]));
                 }
             });
             layout.putConstraint(SpringLayout.WEST, lId, 5, SpringLayout.WEST, page);
@@ -142,10 +158,12 @@ public class ApproveLeavePage {
             dateApplied.setContentAreaFilled(false);
             dateApplied.setBorderPainted(false);
             dateApplied.setForeground(Color.BLUE);
-            dateApplied.setActionCommand(pendingLeaveRequest.get(i).getString("l_id"));
+            dateApplied.setActionCommand(pendingLeaveRequest.get(i).getString("l_id") + " "
+                    + pendingLeaveRequest.get(i).getString("f_id") + " " + nod);
             dateApplied.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    createJOptionPane(Integer.parseInt(e.getActionCommand()));
+                    String[] s = e.getActionCommand().split(" ");
+                    createJOptionPane(Integer.parseInt(s[0]), Integer.parseInt(s[1]), Integer.parseInt(s[2]));
                 }
             });
             layout.putConstraint(SpringLayout.WEST, dateApplied, 5, SpringLayout.EAST, lId);
@@ -157,10 +175,12 @@ public class ApproveLeavePage {
             fId.setContentAreaFilled(false);
             fId.setBorderPainted(false);
             fId.setForeground(Color.BLUE);
-            fId.setActionCommand(pendingLeaveRequest.get(i).getString("l_id"));
+            fId.setActionCommand(pendingLeaveRequest.get(i).getString("l_id") + " "
+                    + pendingLeaveRequest.get(i).getString("f_id") + " " + nod);
             fId.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    createJOptionPane(Integer.parseInt(e.getActionCommand()));
+                    String[] s = e.getActionCommand().split(" ");
+                    createJOptionPane(Integer.parseInt(s[0]), Integer.parseInt(s[1]), Integer.parseInt(s[2]));
                 }
             });
             layout.putConstraint(SpringLayout.WEST, fId, 5, SpringLayout.EAST, dateAppliedHead);
@@ -172,10 +192,12 @@ public class ApproveLeavePage {
             fromDate.setContentAreaFilled(false);
             fromDate.setBorderPainted(false);
             fromDate.setForeground(Color.BLUE);
-            fromDate.setActionCommand(pendingLeaveRequest.get(i).getString("l_id"));
+            fromDate.setActionCommand(pendingLeaveRequest.get(i).getString("l_id") + " "
+                    + pendingLeaveRequest.get(i).getString("f_id") + " " + nod);
             fromDate.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    createJOptionPane(Integer.parseInt(e.getActionCommand()));
+                    String[] s = e.getActionCommand().split(" ");
+                    createJOptionPane(Integer.parseInt(s[0]), Integer.parseInt(s[1]), Integer.parseInt(s[2]));
                 }
             });
             layout.putConstraint(SpringLayout.WEST, fromDate, 5, SpringLayout.EAST, fIdHead);
@@ -187,10 +209,12 @@ public class ApproveLeavePage {
             toDate.setContentAreaFilled(false);
             toDate.setBorderPainted(false);
             toDate.setForeground(Color.BLUE);
-            toDate.setActionCommand(pendingLeaveRequest.get(i).getString("l_id"));
+            toDate.setActionCommand(pendingLeaveRequest.get(i).getString("l_id") + " "
+                    + pendingLeaveRequest.get(i).getString("f_id") + " " + nod);
             toDate.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    createJOptionPane(Integer.parseInt(e.getActionCommand()));
+                    String[] s = e.getActionCommand().split(" ");
+                    createJOptionPane(Integer.parseInt(s[0]), Integer.parseInt(s[1]), Integer.parseInt(s[2]));
                 }
             });
             layout.putConstraint(SpringLayout.WEST, toDate, 5, SpringLayout.EAST, fromDateHead);
@@ -202,10 +226,12 @@ public class ApproveLeavePage {
             reason.setContentAreaFilled(false);
             reason.setBorderPainted(false);
             reason.setForeground(Color.BLUE);
-            reason.setActionCommand(pendingLeaveRequest.get(i).getString("l_id"));
+            reason.setActionCommand(pendingLeaveRequest.get(i).getString("l_id") + " "
+                    + pendingLeaveRequest.get(i).getString("f_id") + " " + nod);
             reason.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    createJOptionPane(Integer.parseInt(e.getActionCommand()));
+                    String[] s = e.getActionCommand().split(" ");
+                    createJOptionPane(Integer.parseInt(s[0]), Integer.parseInt(s[1]), Integer.parseInt(s[2]));
                 }
             });
             layout.putConstraint(SpringLayout.WEST, reason, 5, SpringLayout.EAST, toDateHead);
@@ -217,7 +243,7 @@ public class ApproveLeavePage {
         page.revalidate();
     }
 
-    void createJOptionPane(int lId) {
+    void createJOptionPane(int lId, int fId, int nod) {
         JTextArea newReason = new JTextArea(15, 50);
         JScrollPane scrollPane = new JScrollPane(newReason);
 
@@ -226,27 +252,33 @@ public class ApproveLeavePage {
         newFac.add(new JLabel("Reason: ", JLabel.LEFT));
         newFac.add(scrollPane);
 
-        Object[] options = { "Approve", "Reject" };
+        Object[] options = { "Approve", "Reject", "Keep on Hold" };
         int result = JOptionPane.showOptionDialog(page, newFac, "Please enter the followings",
-                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
-        boolean accepted = false;
-        if (result == JOptionPane.OK_OPTION) 
-            accepted = true;
-        if (facDoc.getString("position").equals("HOD")) {
+                JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+        if (result == JOptionPane.YES_OPTION) {
             try {
-                leavesDb.hodResponse(lId, accepted, Integer.parseInt(facDoc.getString("f_id")), newReason.getText());
+                if (facDoc.getString("position").equals("HOD"))
+                    leavesDb.hodResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")), newReason.getText());
+                else if (facDoc.getString("position").equals("Dean")) {
+                    leavesDb.deanResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")), newReason.getText());
+                    List<Document> toAddTheLeave = db.findFaculties(new Document("f_id", String.valueOf(fId)));
+                    toAddTheLeave.get(0).put("leaves", toAddTheLeave.get(0).getInteger("leaves") - nod);
+                    db.upsertFaculty(toAddTheLeave.get(0));
+                }
+                JOptionPane.showMessageDialog(page, "Approved");
             } catch (NumberFormatException | SQLException e) {
                 e.printStackTrace();
             }
-            JOptionPane.showMessageDialog(page, "Approve: " + accepted);
-        }
-        if (facDoc.getString("position").equals("Dean")) {
+        } else if (result == JOptionPane.NO_OPTION) {
             try {
-                leavesDb.deanResponse(lId, accepted, Integer.parseInt(facDoc.getString("f_id")), newReason.getText());
+                if (facDoc.getString("position").equals("HOD"))
+                    leavesDb.hodResponse(lId, false, Integer.parseInt(facDoc.getString("f_id")), newReason.getText());
+                if (facDoc.getString("position").equals("Dean"))
+                    leavesDb.deanResponse(lId, false, Integer.parseInt(facDoc.getString("f_id")), newReason.getText());
+                JOptionPane.showMessageDialog(page, "Rejected");
             } catch (NumberFormatException | SQLException e) {
                 e.printStackTrace();
             }
-            JOptionPane.showMessageDialog(page, "Approve: " + accepted);
         }
     }
 }

@@ -16,7 +16,7 @@ public class ActivityMain {
     static ConnectToPostgres leavesDb;
     static Stack<JPanel> stActivities;
     static List<Document> depts;
-    static DateFormat df = new SimpleDateFormat("dd/MM/yy");
+    static DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
 
     public static void main(String[] args) {
         mainFrame = new JFrame("Faculty Portal");

@@ -1,19 +1,25 @@
 package com.sid;
 
 import static com.sid.ActivityMain.leavesDb;
+import static com.sid.ActivityMain.db;
 import static com.sid.ActivityMain.setActivity;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
@@ -32,6 +38,7 @@ public class LeavePage {
     public static List<Document> pendingLeaveRequest;
     Document facDoc;
     JButton addButton, approveButton, backButton;
+    JButton NOLButton = new JButton();
 
     JButton dateAppliedHead = new JButton("Date Of Application");
     JButton fIdHead = new JButton("f_id");
@@ -39,6 +46,7 @@ public class LeavePage {
     JButton toDateHead = new JButton("To (yyyy-MM-dd)");
     JButton reasonHead = new JButton("Reason");
     JButton statusHead = new JButton("Status");
+    JButton withDrawHead = new JButton("Withdraw");
     JButton lastLeave;
 
     public LeavePage(Document doc) {
@@ -112,6 +120,15 @@ public class LeavePage {
         });
         page.add(backButton);
 
+        NOLButton.setText("Number of leaves left this year: " + facDoc.getInteger("leaves"));
+        NOLButton.setOpaque(false);
+        NOLButton.setContentAreaFilled(false);
+        NOLButton.setBorderPainted(false);
+        NOLButton.setForeground(Color.BLUE);
+        layout.putConstraint(SpringLayout.WEST, NOLButton, 5, SpringLayout.EAST, backButton);
+        layout.putConstraint(SpringLayout.NORTH, NOLButton, 5, SpringLayout.NORTH, page);
+        page.add(NOLButton);
+
         setUpLeaves(0);
     }
 
@@ -166,6 +183,14 @@ public class LeavePage {
             layout.putConstraint(SpringLayout.WEST, statusHead, 5, SpringLayout.EAST, reasonHead);
             layout.putConstraint(SpringLayout.NORTH, statusHead, 5, SpringLayout.SOUTH, addButton);
             page.add(statusHead);
+
+            withDrawHead.setOpaque(false);
+            withDrawHead.setContentAreaFilled(false);
+            withDrawHead.setBorderPainted(false);
+            withDrawHead.setFont(new Font(withDrawHead.getFont().getName(), Font.BOLD, withDrawHead.getFont().getSize() + 5));
+            layout.putConstraint(SpringLayout.WEST, withDrawHead, 75, SpringLayout.EAST, statusHead);
+            layout.putConstraint(SpringLayout.NORTH, withDrawHead, 5, SpringLayout.SOUTH, addButton);
+            page.add(withDrawHead);
 
             lastLeave = dateAppliedHead;
         }
@@ -260,6 +285,7 @@ public class LeavePage {
                 status.setActionCommand("commentsfac" + " " + i);
                 status.setText("Wating for HOD Approval");
             }
+            status.setSize(1, 10);
             status.setOpaque(false);
             status.setContentAreaFilled(false);
             status.setBorderPainted(false);
@@ -274,6 +300,48 @@ public class LeavePage {
             layout.putConstraint(SpringLayout.WEST, status, 5, SpringLayout.EAST, reasonHead);
             layout.putConstraint(SpringLayout.NORTH, status, 5, SpringLayout.SOUTH, lastLeave);
             page.add(status);
+
+            JButton withDraw = new JButton();
+            try {
+                withDraw.setIcon(new ImageIcon(ImageIO.read(new File("src/R/drawable/delete.png")).getScaledInstance(15,
+                        15, java.awt.Image.SCALE_SMOOTH)));
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+            withDraw.setOpaque(false);
+            withDraw.setContentAreaFilled(false);
+            withDraw.setBorderPainted(false);
+            withDraw.setForeground(Color.BLUE);
+            withDraw.setActionCommand(i + "");
+            withDraw.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    Document levDoc = leaves.get(Integer.parseInt(e.getActionCommand()));
+                    DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+                    if(levDoc.getString("status").equals("rejectedLeaves")){
+                        JOptionPane.showMessageDialog(page, "Unable to withdraw.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    int result = JOptionPane.showConfirmDialog(page, "Are you sure you want to withdraw the application.", "Delete", JOptionPane.YES_NO_OPTION);
+                    if(result == JOptionPane.YES_OPTION){
+                        try {
+                            leavesDb.redeemLeaves(Integer.parseInt(levDoc.getString("l_id")), levDoc.getString("status"));
+                            if(levDoc.getString("status").equals("approvedLeaves")){
+                                int nod = (int) (df.parse(levDoc.getString("to_date")).getTime()
+                                        - df.parse(levDoc.getString("from_date")).getTime()) / 86400000 + 1;
+                                facDoc.put("leaves", nod + facDoc.getInteger("leaves"));
+                                db.upsertFaculty(facDoc);
+                            }
+                            backButton.doClick();
+                            FacultyPage.leaveButton.doClick();
+                        } catch (ParseException | NumberFormatException | SQLException e1) {
+                            e1.printStackTrace();
+                        }
+                    }
+                }
+            });
+            layout.putConstraint(SpringLayout.WEST, withDraw, 75, SpringLayout.EAST, statusHead);
+            layout.putConstraint(SpringLayout.NORTH, withDraw, 5, SpringLayout.SOUTH, lastLeave);
+            page.add(withDraw);
 
             lastLeave = dateApplied;
         }
@@ -303,12 +371,19 @@ public class LeavePage {
                 JOptionPane.showMessageDialog(page, "* fields must be Filled. Try Again");
             else {
                 try {
-                    leavesDb.createNewLeaveEntry(Integer.parseInt(facDoc.getString("f_id")), facDoc.getString("d_id"),
-                            Date.valueOf(newFromDate.getText()), Date.valueOf(newFromDate.getText()),
-                            newReason.getText());
-                    leaves = leavesDb.getAllLeaves(Integer.parseInt(facDoc.getString("f_id")));
-                    setUpLeaves(leaves.size() - 1);
-                } catch (NumberFormatException | SQLException e) {
+                    int nod = (int) (df.parse(newToDate.getText()).getTime()
+                            - df.parse(newFromDate.getText()).getTime()) / 86400000 + 1;
+                    if (nod <= facDoc.getInteger("leaves")) {
+                        leavesDb.createNewLeaveEntry(Integer.parseInt(facDoc.getString("f_id")),
+                                facDoc.getString("d_id"), Date.valueOf(newFromDate.getText()),
+                                Date.valueOf(newToDate.getText()), newReason.getText());
+                        leaves = leavesDb.getAllLeaves(Integer.parseInt(facDoc.getString("f_id")));
+                        setUpLeaves(leaves.size() - 1);
+                        JOptionPane.showMessageDialog(page, "Request Created");
+                    } else {
+                        JOptionPane.showMessageDialog(page, nod + " leaves not available in your account.");
+                    }
+                } catch (NumberFormatException | SQLException | ParseException e) {
                     e.printStackTrace();
                 }
             }

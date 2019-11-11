@@ -18,7 +18,6 @@ public class ConnectToDB {
     MongoDatabase database;
     MongoCollection<Document> collectionFaculty;
     MongoCollection<Document> collectionDepartment;
-    MongoCollection<Document> collectionLeaves;
     public Document facultyDoc;
 
     private void print(String s) {
@@ -38,7 +37,6 @@ public class ConnectToDB {
         // Accessing the collections
         collectionFaculty = database.getCollection("Faculty");
         collectionDepartment = database.getCollection("Department");
-        collectionLeaves = database.getCollection("Leaves");
     }
 
     public boolean checkValidUser(String id, String pwd) {
@@ -95,7 +93,7 @@ public class ConnectToDB {
                             .append("name", name)
                             .append("d_id", dName)
                             .append("position", position)
-                            .append("leaves", 5);
+                            .append("leaves", 15);
         Document extra = new Document().append("About Me", "")
                             .append("Skill Set", "");
         BasicDBObject work  =  new BasicDBObject().append("EmployeeID", id)
@@ -129,9 +127,9 @@ public class ConnectToDB {
         collectionFaculty.replaceOne(Filters.eq("f_id", doc.getString("f_id")), doc);
     }
 
-    public List<Document> findAllLeaves(String id) {
-        print("findAllLeaves");
-        return collectionLeaves.find(Filters.eq("f_id", id)).sort(new Document("Request Date", 1))
-                .into(new ArrayList<Document>());
+    public List<Document> findFaculties(Document filter) {
+        print("findFaculties");
+        return collectionFaculty.find(filter).into(new ArrayList<Document>());
     }
+
 }

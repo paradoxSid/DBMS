@@ -14,14 +14,19 @@ import org.bson.Document;
 import java.sql.Date;
 
 public class ConnectToPostgres {
+    private static String log = "ConnectToPostgres: ";
     Connection c = null;
     Statement stmt = null;
+
+    private void print(String s) {
+        System.out.println(log + s);
+    }
 
     public ConnectToPostgres() {
         try {
             c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/leaves", "postgres", "admin");
             c.setAutoCommit(false);
-            System.out.println("Opened database successfully");
+            print("Connected");
         } catch (Exception e) {
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
             System.exit(0);
@@ -45,6 +50,7 @@ public class ConnectToPostgres {
     }
 
     public void createNewLeaveEntry(int fId, String dId, Date date, Date date2, String comments) throws SQLException {
+        print("createNewLeaveEntry");
         stmt = c.createStatement();
 
         ResultSet rs = stmt.executeQuery("SELECT count(l_id) FROM allLeaves;");
@@ -72,6 +78,7 @@ public class ConnectToPostgres {
     }
 
     public void hodResponse(int lId, boolean accepted, int hodId, String comments) throws SQLException {
+        print("hodResponse");
         stmt = c.createStatement();
 
         ResultSet rs = stmt.executeQuery("SELECT * FROM newLeaves WHERE l_id = " + lId + ";");
@@ -124,6 +131,7 @@ public class ConnectToPostgres {
     }
 
     public void deanResponse(int lId, boolean accepted, int deanId, String comments) throws SQLException {
+        print("deanResponse");
         stmt = c.createStatement();
 
         ResultSet rs = stmt.executeQuery("SELECT * FROM approved1Leaves WHERE l_id = " + lId + ";");
@@ -180,7 +188,37 @@ public class ConnectToPostgres {
         c.commit();
     }
 
+    public void redeemLeaves(int lId, String tableName) throws SQLException {
+        print("redeemLeaves");
+        stmt = c.createStatement();
+
+        ResultSet rs = stmt.executeQuery("SELECT * FROM " + tableName + " WHERE l_id = " + lId + ";");
+        rs.next();
+        String sql1 = "INSERT INTO rejectedLeaves(l_id, application_date, f_id, d_id, from_date, to_date, commentsFac,"
+                + " auth, authId, authComments, authResponseTime)" + " VALUES (?,?,?,?,?,?,?,?,?,?,?);";
+        PreparedStatement pstmt = c.prepareStatement(sql1, Statement.RETURN_GENERATED_KEYS);
+        pstmt.setInt(1, rs.getInt("l_id"));
+        pstmt.setObject(2, rs.getDate("application_date"));
+        pstmt.setInt(3, rs.getInt("f_id"));
+        pstmt.setString(4, rs.getString("d_id"));
+        pstmt.setObject(5, rs.getDate("from_date"));
+        pstmt.setObject(6, rs.getDate("to_date"));
+        pstmt.setString(7, rs.getString("commentsFac"));
+        pstmt.setString(8, "Self");
+        pstmt.setInt(9, rs.getInt("f_id"));
+        pstmt.setString(10, "Self Redeem");
+        pstmt.setObject(11, new Date(new java.util.Date().getTime()));
+        pstmt.executeUpdate();
+
+        stmt.executeUpdate("UPDATE allLeaves SET application_status = 'rejectedLeaves' WHERE l_id = " + lId + ";");
+
+        stmt.executeUpdate("DELETE FROM " + tableName + " WHERE l_id = " + lId + ";");
+        stmt.close();
+        c.commit();
+    }
+
     public List<Document> leavesVisibleToHOD(String dId) throws SQLException {
+        print("leavesVisibleToHOD");
         List<Document> leavesDId = new ArrayList<>();
         stmt = c.createStatement();
 
@@ -200,6 +238,7 @@ public class ConnectToPostgres {
     }
 
     public List<Document> leavesVisibleToDean() throws SQLException {
+        print("leavesVisibleToDean");
         List<Document> leaveRequestsToDean = new ArrayList<>();
         stmt = c.createStatement();
 
@@ -222,6 +261,7 @@ public class ConnectToPostgres {
     }
 
     public List<Document> getAllLeaves(int fId) throws SQLException {
+        print("getAllLeaves");
         List<Document> leavesFid = new ArrayList<>();
         stmt = c.createStatement();
 

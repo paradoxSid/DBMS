@@ -36,7 +36,7 @@ public class FacultyPage {
     public JPanel page = new JPanel();
     SpringLayout layout;
     public static Document facDoc;
-    JButton leaveButton, logoutButton;
+    public static JButton leaveButton, searchButton, logoutButton;
 
     public FacultyPage(Document doc) {
         layout = new SpringLayout();
@@ -48,8 +48,20 @@ public class FacultyPage {
         layout.putConstraint(SpringLayout.NORTH, leaveButton, 5, SpringLayout.NORTH, page);
         page.add(leaveButton);
 
+        searchButton = new JButton();
+        try {
+            searchButton.setIcon(new ImageIcon(ImageIO.read(new File("src/R/drawable/search.png")).getScaledInstance(15,
+                    15, java.awt.Image.SCALE_SMOOTH)));
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        searchButton.setText("Search");
+        layout.putConstraint(SpringLayout.WEST, searchButton, 5, SpringLayout.EAST, leaveButton);
+        layout.putConstraint(SpringLayout.NORTH, searchButton, 5, SpringLayout.NORTH, page);
+        page.add(searchButton);
+
         logoutButton = new JButton("Logout");
-        layout.putConstraint(SpringLayout.WEST, logoutButton, 5, SpringLayout.EAST, leaveButton);
+        layout.putConstraint(SpringLayout.WEST, logoutButton, 5, SpringLayout.EAST, searchButton);
         layout.putConstraint(SpringLayout.NORTH, logoutButton, 5, SpringLayout.NORTH, page);
         page.add(logoutButton);
 
@@ -59,6 +71,13 @@ public class FacultyPage {
             public void actionPerformed(ActionEvent e) {
                 LeavePage leavePage = new LeavePage(facDoc);
                 setActivity(leavePage.page);
+            }
+        });
+
+        searchButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                QueryPage queryPage = new QueryPage();
+                setActivity(queryPage.page);
             }
         });
 
@@ -266,9 +285,9 @@ public class FacultyPage {
         email.setText(((Document) extrasDoc.get("Personal")).getString("Email"));
         birth.setText(((Document) extrasDoc.get("Personal")).getString("Birth Date"));
         textAdd.setText(((Document) extrasDoc.get("Personal")).getString("Address"));
-        if(((Document) extrasDoc.get("Personal")).getString("Gender").equals("Male"))
+        if (((Document) extrasDoc.get("Personal")).getString("Gender").equals("Male"))
             male.setSelected(true);
-        else if(((Document) extrasDoc.get("Personal")).getString("Gender").equals("Female"))
+        else if (((Document) extrasDoc.get("Personal")).getString("Gender").equals("Female"))
             female.setSelected(true);
 
         editFac.setLayout(new BoxLayout(editFac, BoxLayout.PAGE_AXIS));
@@ -306,7 +325,7 @@ public class FacultyPage {
                 ((Document) extras.get("Personal")).put("Email", email.getText());
                 ((Document) extras.get("Personal")).put("Birth Date", birth.getText());
                 ((Document) extras.get("Personal")).put("Address", textAdd.getText());
-                if(male.isSelected())
+                if (male.isSelected())
                     ((Document) extras.get("Personal")).put("Gender", "Male");
                 else
                     ((Document) extras.get("Personal")).put("Gender", "Female");

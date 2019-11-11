@@ -32,6 +32,7 @@ public class AdminPage {
     public static List<Document> allFaculties;
     public static HashMap<String, List<Document>> faculties;
     JButton addDepartmentButton;
+    JButton searchButton;
     JButton logoutButton;
     JButton lastDept = null;
     JButton dept = new JButton("Departments");
@@ -42,6 +43,15 @@ public class AdminPage {
         page = new JPanel();
         layout = new SpringLayout();
         page.setLayout(layout);
+
+        searchButton = new JButton();
+        try {
+            searchButton.setIcon(new ImageIcon(ImageIO.read(new File("src/R/drawable/search.png")).getScaledInstance(15,
+                    15, java.awt.Image.SCALE_SMOOTH)));
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        searchButton.setText("Search");
 
         addDepartmentButton = new JButton("Add department");
         logoutButton = new JButton("Log Out");
@@ -57,7 +67,10 @@ public class AdminPage {
         layout.putConstraint(SpringLayout.WEST, addDepartmentButton, 5, SpringLayout.WEST, page);
         layout.putConstraint(SpringLayout.NORTH, addDepartmentButton, 5, SpringLayout.NORTH, page);
 
-        layout.putConstraint(SpringLayout.WEST, logoutButton, 5, SpringLayout.EAST, addDepartmentButton);
+        layout.putConstraint(SpringLayout.WEST, searchButton, 5, SpringLayout.EAST, addDepartmentButton);
+        layout.putConstraint(SpringLayout.NORTH, searchButton, 5, SpringLayout.NORTH, page);
+
+        layout.putConstraint(SpringLayout.WEST, logoutButton, 5, SpringLayout.EAST, searchButton);
         layout.putConstraint(SpringLayout.NORTH, logoutButton, 5, SpringLayout.NORTH, page);
 
         addDepartmentButton.addActionListener(new ActionListener() {
@@ -128,6 +141,14 @@ public class AdminPage {
                 }
             }
         });
+
+        searchButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                QueryPage queryPage = new QueryPage();
+                setActivity(queryPage.page);
+            }
+        });
+
         logoutButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 db.facultyDoc = null;
@@ -136,6 +157,7 @@ public class AdminPage {
         });
 
         page.add(addDepartmentButton);
+        page.add(searchButton);
         page.add(logoutButton);
     }
 
