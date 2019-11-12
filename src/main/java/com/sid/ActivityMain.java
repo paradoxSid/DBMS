@@ -8,6 +8,7 @@ import java.util.Stack;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+
 import org.bson.Document;;
 
 public class ActivityMain {
@@ -33,7 +34,7 @@ public class ActivityMain {
         leavesDb = new ConnectToPostgres();
         LoginPage loginPage = new LoginPage();
         setActivity(loginPage.page);
-
+        
         mainFrame.setVisible(true);
     }
 

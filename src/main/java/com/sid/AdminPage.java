@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.imageio.ImageIO;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -35,9 +36,14 @@ public class AdminPage {
     JButton searchButton;
     JButton logoutButton;
     JButton lastDept = null;
+    JButton lastCCF = null;
     JButton dept = new JButton("Departments");
     JButton hod = new JButton("HOD");
     JButton deleteDept = new JButton("Delete");
+
+    JButton ccfPosition = new JButton("Position");
+    JButton ccfName = new JButton("Name");
+    JButton ccfId = new JButton("Id");
 
     public AdminPage() {
         page = new JPanel();
@@ -60,9 +66,14 @@ public class AdminPage {
         logoutButton.setBorderPainted(false);
         logoutButton.setForeground(Color.RED);
 
-        setDepartmentNames(0);
         allFaculties = db.findAllFaculty();
         distributeFaculties(allFaculties);
+        if (depts.isEmpty()) {
+            addCCF("Director");
+        }
+        lastCCF = addDepartmentButton;
+        setCCF();
+        setDepartmentNames(1);
 
         layout.putConstraint(SpringLayout.WEST, addDepartmentButton, 5, SpringLayout.WEST, page);
         layout.putConstraint(SpringLayout.NORTH, addDepartmentButton, 5, SpringLayout.NORTH, page);
@@ -161,6 +172,109 @@ public class AdminPage {
         page.add(logoutButton);
     }
 
+    private void setCCF() {
+        ccfPosition.setOpaque(false);
+        ccfPosition.setContentAreaFilled(false);
+        ccfPosition.setBorderPainted(false);
+        ccfPosition.setFont(new Font(dept.getFont().getName(), Font.BOLD, dept.getFont().getSize() + 5));
+        layout.putConstraint(SpringLayout.WEST, ccfPosition, 5, SpringLayout.WEST, page);
+        layout.putConstraint(SpringLayout.NORTH, ccfPosition, 5, SpringLayout.SOUTH, addDepartmentButton);
+        page.add(ccfPosition);
+
+        ccfName.setOpaque(false);
+        ccfName.setContentAreaFilled(false);
+        ccfName.setBorderPainted(false);
+        ccfName.setFont(new Font(ccfName.getFont().getName(), Font.BOLD, ccfName.getFont().getSize() + 5));
+        layout.putConstraint(SpringLayout.WEST, ccfName, 5, SpringLayout.EAST, ccfPosition);
+        layout.putConstraint(SpringLayout.NORTH, ccfName, 5, SpringLayout.SOUTH, addDepartmentButton);
+        page.add(ccfName);
+
+        ccfId.setOpaque(false);
+        ccfId.setContentAreaFilled(false);
+        ccfId.setBorderPainted(false);
+        ccfId.setFont(new Font(ccfId.getFont().getName(), Font.BOLD, ccfId.getFont().getSize() + 5));
+        layout.putConstraint(SpringLayout.WEST, ccfId, 5, SpringLayout.EAST, ccfName);
+        layout.putConstraint(SpringLayout.NORTH, ccfId, 5, SpringLayout.SOUTH, addDepartmentButton);
+        page.add(ccfId);
+
+        lastCCF = ccfPosition;
+        for (Document doc : faculties.get("CCF")) {
+
+            JButton position = new JButton(doc.getString("position"));
+            JButton name = new JButton(doc.getString("name"));
+            JButton id = new JButton(doc.getString("f_id"));
+
+            position.setOpaque(false);
+            position.setContentAreaFilled(false);
+            position.setBorderPainted(false);
+            position.setForeground(Color.BLUE);
+
+            name.setOpaque(false);
+            name.setContentAreaFilled(false);
+            name.setBorderPainted(false);
+            name.setForeground(Color.BLUE);
+
+            id.setOpaque(false);
+            id.setContentAreaFilled(false);
+            id.setBorderPainted(false);
+            id.setForeground(Color.BLUE);
+
+            layout.putConstraint(SpringLayout.WEST, position, 5, SpringLayout.WEST, page);
+            layout.putConstraint(SpringLayout.NORTH, position, 5, SpringLayout.SOUTH, lastCCF);
+
+            layout.putConstraint(SpringLayout.WEST, name, 5, SpringLayout.EAST, ccfPosition);
+            layout.putConstraint(SpringLayout.NORTH, name, 5, SpringLayout.SOUTH, lastCCF);
+
+            layout.putConstraint(SpringLayout.WEST, id, 8, SpringLayout.EAST, ccfName);
+            layout.putConstraint(SpringLayout.NORTH, id, 5, SpringLayout.SOUTH, lastCCF);
+
+            page.add(position);
+            page.add(name);
+            page.add(id);
+            lastCCF = position;
+        }
+    }
+
+    private void addCCF(String position) {
+        JTextField name = new JTextField(5);
+        JTextField id = new JTextField(5);
+        JTextField pwd = new JTextField(5);
+
+        JPanel newDept = new JPanel();
+        newDept.setLayout(new BoxLayout(newDept, BoxLayout.PAGE_AXIS));
+        newDept.add(new JLabel("Name: *"));
+        newDept.add(name);
+        newDept.add(new JLabel("ID: *"));
+        newDept.add(id);
+        newDept.add(new JLabel("Password: *"));
+        newDept.add(pwd);
+        int result = JOptionPane.showConfirmDialog(page, newDept, "Enter Details of " + position,
+                JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            if (name.getText().isEmpty() || id.getText().isEmpty() || pwd.getText().isEmpty())
+                JOptionPane.showMessageDialog(page, "All the fields must be Filled. Try Again");
+            else {
+                Document insertedFac = db.addNewFaculty(id.getText(), pwd.getText(), name.getText(), "CCF", position);
+                if (allFaculties == null) {
+                    allFaculties = new ArrayList<>();
+                    distributeFaculties(allFaculties);
+                }
+                allFaculties.add(insertedFac);
+                if (faculties.get("CCF") == null)
+                    faculties.put("CCF", new ArrayList<Document>());
+                faculties.get("CCF").add(insertedFac);
+                if (position.equals("Director")) {
+                    Document insertedDept = db.addNewDepartment("CCF", "-1");
+                    depts.add(insertedDept);
+                    addCCF("Dean");
+                }
+                if (position.equals("Dean"))
+                    addCCF("Associative Dean");
+            }
+        }
+
+    }
+
     public void distributeFaculties(List<Document> list) {
         faculties = new HashMap<>();
         for (Document doc : list) {
@@ -179,7 +293,7 @@ public class AdminPage {
             dept.setBorderPainted(false);
             dept.setFont(new Font(dept.getFont().getName(), Font.BOLD, dept.getFont().getSize() + 5));
             layout.putConstraint(SpringLayout.WEST, dept, 5, SpringLayout.WEST, page);
-            layout.putConstraint(SpringLayout.NORTH, dept, 5, SpringLayout.SOUTH, addDepartmentButton);
+            layout.putConstraint(SpringLayout.NORTH, dept, 5, SpringLayout.SOUTH, lastCCF);
             page.add(dept);
 
             hod.setOpaque(false);
@@ -187,7 +301,7 @@ public class AdminPage {
             hod.setBorderPainted(false);
             hod.setFont(new Font(hod.getFont().getName(), Font.BOLD, hod.getFont().getSize() + 5));
             layout.putConstraint(SpringLayout.WEST, hod, 5, SpringLayout.EAST, dept);
-            layout.putConstraint(SpringLayout.NORTH, hod, 5, SpringLayout.SOUTH, addDepartmentButton);
+            layout.putConstraint(SpringLayout.NORTH, hod, 5, SpringLayout.SOUTH, lastCCF);
             page.add(hod);
 
             deleteDept.setOpaque(false);
@@ -195,7 +309,7 @@ public class AdminPage {
             deleteDept.setBorderPainted(false);
             deleteDept.setFont(new Font(deleteDept.getFont().getName(), Font.BOLD, deleteDept.getFont().getSize() + 5));
             layout.putConstraint(SpringLayout.WEST, deleteDept, 5, SpringLayout.EAST, hod);
-            layout.putConstraint(SpringLayout.NORTH, deleteDept, 5, SpringLayout.SOUTH, addDepartmentButton);
+            layout.putConstraint(SpringLayout.NORTH, deleteDept, 5, SpringLayout.SOUTH, lastCCF);
             page.add(deleteDept);
 
             lastDept = dept;
@@ -223,7 +337,7 @@ public class AdminPage {
             hodName.setContentAreaFilled(false);
             hodName.setBorderPainted(false);
             hodName.setForeground(Color.BLUE);
-            hodName.setActionCommand(allhod.getString(String.valueOf(allhod.size() - 1)));
+            hodName.setActionCommand(depts.get(i).getString("d_id"));
 
             removeDept.setOpaque(false);
             removeDept.setContentAreaFilled(false);
@@ -240,7 +354,65 @@ public class AdminPage {
 
             hodName.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    JOptionPane.showMessageDialog(page, e.getActionCommand());
+                    JTextField fac_id = new JTextField(5);
+
+                    JPanel newfac = new JPanel();
+                    newfac.setLayout(new BoxLayout(newfac, BoxLayout.PAGE_AXIS));
+                    newfac.add(new JLabel("Faculty Id: *"));
+                    newfac.add(fac_id);
+
+                    int result = JOptionPane.showConfirmDialog(page, newfac, "Please enter the followings",
+                            JOptionPane.OK_CANCEL_OPTION);
+                    if (result == JOptionPane.OK_OPTION) {
+                        String hod_id = fac_id.getText();
+
+                        Document temp_dept = null;
+                        for (Document doc : depts) {
+                            if (doc.getString("d_id").equals(e.getActionCommand())) {
+                                temp_dept = doc;
+                                break;
+                            }
+                        }
+
+                        Document newHodDocument = null;
+                        for (Document doc : faculties.get(e.getActionCommand())) {
+                            if (doc.getString("f_id").equals(hod_id)) {
+                                newHodDocument = doc;
+                                break;
+                            }
+                        }
+
+                        String hod_faculty = null;
+                        if (newHodDocument != null) {
+                            // allFaculties.remove(temp);
+                            Document tempDoc = ((Document) temp_dept.get("hod"));
+                            hod_faculty = tempDoc.getString(String.valueOf(tempDoc.size() - 1));
+
+                            for (Document doc : faculties.get(e.getActionCommand())) {
+                                if (doc.getString("f_id").equals(hod_faculty)) {
+                                    allFaculties.remove(doc);
+                                    allFaculties.remove(newHodDocument);
+                                    faculties.get(e.getActionCommand()).remove(doc);
+                                    faculties.get(e.getActionCommand()).remove(newHodDocument);
+                                    doc.put("position", "Faculty");
+                                    db.upsertFaculty(doc);
+                                    newHodDocument.put("position", "HOD");
+                                    db.upsertFaculty(newHodDocument);
+                                    allFaculties.add(doc);
+                                    allFaculties.add(newHodDocument);
+                                    faculties.get(e.getActionCommand()).add(doc);
+                                    faculties.get(e.getActionCommand()).add(newHodDocument);
+                                    break;
+                                }
+                            }
+                            tempDoc.put(String.valueOf(tempDoc.size()), fac_id.getText());
+                            temp_dept.put("hod", tempDoc);
+                            db.upsertDept(temp_dept);
+                            logoutButton.doClick();
+                            LoginPage.loginButton.doClick();
+                        } else
+                            JOptionPane.showMessageDialog(page, "No faculty with id " + fac_id.getText() + " found in " + e.getActionCommand() + ".");
+                    }
                 }
             });
 

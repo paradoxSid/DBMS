@@ -1,6 +1,7 @@
 package com.sid;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -37,6 +38,10 @@ public class ConnectToDB {
         // Accessing the collections
         collectionFaculty = database.getCollection("Faculty");
         collectionDepartment = database.getCollection("Department");
+
+        Calendar date = Calendar.getInstance();
+        if(date.get(Calendar.MONTH) == 0 && date.get(Calendar.DATE) == 1)
+            resetLeaves(date.get(Calendar.YEAR));
     }
 
     public boolean checkValidUser(String id, String pwd) {
@@ -93,13 +98,14 @@ public class ConnectToDB {
                             .append("name", name)
                             .append("d_id", dName)
                             .append("position", position)
-                            .append("leaves", 15);
+                            .append("leaves", 15)
+                            .append("year", Calendar.getInstance().get(Calendar.YEAR));
         Document extra = new Document().append("About Me", "")
                             .append("Skill Set", "");
         BasicDBObject work  =  new BasicDBObject().append("EmployeeID", id)
-                            .append("Department", dName)
+                            .append("Department", "")
                             .append("HOD ID", "")
-                            .append("Title", position)
+                            .append("Title", "")
                             .append("Office", "")
                             .append("Date of joining", new Date())
                             .append("Employee Status", "Active");
@@ -127,9 +133,28 @@ public class ConnectToDB {
         collectionFaculty.replaceOne(Filters.eq("f_id", doc.getString("f_id")), doc);
     }
 
+    public void upsertDept(Document doc) {
+        print("upsertDept");
+        collectionDepartment.replaceOne(Filters.eq("d_id", doc.getString("d_id")), doc);
+    }
+
     public List<Document> findFaculties(Document filter) {
         print("findFaculties");
         return collectionFaculty.find(filter).into(new ArrayList<Document>());
     }
+
+	private void resetLeaves(int year) {
+        print("resetLeaves");
+        Document filter = new Document().append("leaves", new Document("$gte", 0)).append("year",
+                new Document("$ne", year));
+        Document updateDoc = new Document().append("$set", new Document("leaves", 15).append("year", year));
+        collectionFaculty.updateMany(filter , updateDoc);
+
+        Document filter1 = new Document().append("leaves", new Document("$lt", 0)).append("year",
+                new Document("$ne", year));
+        Document updateDoc1 = new Document().append("$inc", new Document("leaves", 15)).append("$set",
+                new Document("year", year));
+        collectionFaculty.updateMany(filter1, updateDoc1);
+	}
 
 }

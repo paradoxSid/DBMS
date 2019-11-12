@@ -1,7 +1,7 @@
 package com.sid;
 
-import static com.sid.ActivityMain.leavesDb;
 import static com.sid.ActivityMain.db;
+import static com.sid.ActivityMain.leavesDb;
 import static com.sid.ActivityMain.setActivity;
 import static com.sid.LeavePage.pendingLeaveRequest;
 
@@ -9,13 +9,19 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
+import java.sql.Date;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
 
+import javax.imageio.ImageIO;
 import javax.swing.BoxLayout;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -30,7 +36,7 @@ public class ApproveLeavePage {
     public JPanel page = new JPanel();
     SpringLayout layout = new SpringLayout();
     Document facDoc;
-    JButton addButton, backButton;
+    JButton refreshButton, backButton;
 
     JButton lIdHead = new JButton("l_id");
     JButton dateAppliedHead = new JButton("Date Of Application");
@@ -38,28 +44,32 @@ public class ApproveLeavePage {
     JButton fromDateHead = new JButton("From (yyyy-MM-dd)");
     JButton toDateHead = new JButton("To (yyyy-MM-dd)");
     JButton reasonHead = new JButton("Reason");
+    JButton borrowHead = new JButton("Borrow");
+    JButton availabilityHead = new JButton("Availability");
     JButton lastLeave;
 
     public ApproveLeavePage(Document doc) {
         page.setLayout(layout);
         facDoc = doc;
 
-        addButton = new JButton("Apply for leave");
-        layout.putConstraint(SpringLayout.WEST, addButton, 5, SpringLayout.WEST, page);
-        layout.putConstraint(SpringLayout.NORTH, addButton, 5, SpringLayout.NORTH, page);
-        addButton.addActionListener(new ActionListener() {
+        refreshButton = new JButton("Refresh");
+        layout.putConstraint(SpringLayout.WEST, refreshButton, 5, SpringLayout.WEST, page);
+        layout.putConstraint(SpringLayout.NORTH, refreshButton, 5, SpringLayout.NORTH, page);
+        refreshButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // createJOptionPane();
+                backButton.doClick();
+                LeavePage.refreshButton.doClick();
+                LeavePage.approveButton.doClick();
             }
         });
-        page.add(addButton);
+        page.add(refreshButton);
 
         backButton = new JButton("Back");
         backButton.setOpaque(false);
         backButton.setContentAreaFilled(false);
         backButton.setBorderPainted(false);
         backButton.setForeground(Color.RED);
-        layout.putConstraint(SpringLayout.WEST, backButton, 5, SpringLayout.EAST, addButton);
+        layout.putConstraint(SpringLayout.WEST, backButton, 5, SpringLayout.EAST, refreshButton);
         layout.putConstraint(SpringLayout.NORTH, backButton, 5, SpringLayout.NORTH, page);
         backButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -78,7 +88,7 @@ public class ApproveLeavePage {
             lIdHead.setBorderPainted(false);
             lIdHead.setFont(new Font(lIdHead.getFont().getName(), Font.BOLD, lIdHead.getFont().getSize() + 5));
             layout.putConstraint(SpringLayout.WEST, lIdHead, 5, SpringLayout.WEST, page);
-            layout.putConstraint(SpringLayout.NORTH, lIdHead, 5, SpringLayout.SOUTH, addButton);
+            layout.putConstraint(SpringLayout.NORTH, lIdHead, 5, SpringLayout.SOUTH, refreshButton);
             page.add(lIdHead);
 
             dateAppliedHead.setOpaque(false);
@@ -87,7 +97,7 @@ public class ApproveLeavePage {
             dateAppliedHead.setFont(
                     new Font(dateAppliedHead.getFont().getName(), Font.BOLD, dateAppliedHead.getFont().getSize() + 5));
             layout.putConstraint(SpringLayout.WEST, dateAppliedHead, 5, SpringLayout.EAST, lIdHead);
-            layout.putConstraint(SpringLayout.NORTH, dateAppliedHead, 5, SpringLayout.SOUTH, addButton);
+            layout.putConstraint(SpringLayout.NORTH, dateAppliedHead, 5, SpringLayout.SOUTH, refreshButton);
             page.add(dateAppliedHead);
 
             fIdHead.setOpaque(false);
@@ -95,7 +105,7 @@ public class ApproveLeavePage {
             fIdHead.setBorderPainted(false);
             fIdHead.setFont(new Font(fIdHead.getFont().getName(), Font.BOLD, fIdHead.getFont().getSize() + 5));
             layout.putConstraint(SpringLayout.WEST, fIdHead, 5, SpringLayout.EAST, dateAppliedHead);
-            layout.putConstraint(SpringLayout.NORTH, fIdHead, 5, SpringLayout.SOUTH, addButton);
+            layout.putConstraint(SpringLayout.NORTH, fIdHead, 5, SpringLayout.SOUTH, refreshButton);
             page.add(fIdHead);
 
             fromDateHead.setOpaque(false);
@@ -104,7 +114,7 @@ public class ApproveLeavePage {
             fromDateHead.setFont(
                     new Font(fromDateHead.getFont().getName(), Font.BOLD, fromDateHead.getFont().getSize() + 5));
             layout.putConstraint(SpringLayout.WEST, fromDateHead, 5, SpringLayout.EAST, fIdHead);
-            layout.putConstraint(SpringLayout.NORTH, fromDateHead, 5, SpringLayout.SOUTH, addButton);
+            layout.putConstraint(SpringLayout.NORTH, fromDateHead, 5, SpringLayout.SOUTH, refreshButton);
             page.add(fromDateHead);
 
             toDateHead.setOpaque(false);
@@ -112,7 +122,7 @@ public class ApproveLeavePage {
             toDateHead.setBorderPainted(false);
             toDateHead.setFont(new Font(toDateHead.getFont().getName(), Font.BOLD, toDateHead.getFont().getSize() + 5));
             layout.putConstraint(SpringLayout.WEST, toDateHead, 5, SpringLayout.EAST, fromDateHead);
-            layout.putConstraint(SpringLayout.NORTH, toDateHead, 5, SpringLayout.SOUTH, addButton);
+            layout.putConstraint(SpringLayout.NORTH, toDateHead, 5, SpringLayout.SOUTH, refreshButton);
             page.add(toDateHead);
 
             reasonHead.setOpaque(false);
@@ -120,13 +130,30 @@ public class ApproveLeavePage {
             reasonHead.setBorderPainted(false);
             reasonHead.setFont(new Font(reasonHead.getFont().getName(), Font.BOLD, reasonHead.getFont().getSize() + 5));
             layout.putConstraint(SpringLayout.WEST, reasonHead, 5, SpringLayout.EAST, toDateHead);
-            layout.putConstraint(SpringLayout.NORTH, reasonHead, 5, SpringLayout.SOUTH, addButton);
+            layout.putConstraint(SpringLayout.NORTH, reasonHead, 5, SpringLayout.SOUTH, refreshButton);
             page.add(reasonHead);
+
+            borrowHead.setOpaque(false);
+            borrowHead.setContentAreaFilled(false);
+            borrowHead.setBorderPainted(false);
+            borrowHead.setFont(new Font(borrowHead.getFont().getName(), Font.BOLD, borrowHead.getFont().getSize() + 5));
+            layout.putConstraint(SpringLayout.WEST, borrowHead, 5, SpringLayout.EAST, reasonHead);
+            layout.putConstraint(SpringLayout.NORTH, borrowHead, 5, SpringLayout.SOUTH, refreshButton);
+            page.add(borrowHead);
+
+            availabilityHead.setOpaque(false);
+            availabilityHead.setContentAreaFilled(false);
+            availabilityHead.setBorderPainted(false);
+            availabilityHead.setFont(new Font(availabilityHead.getFont().getName(), Font.BOLD,
+                    availabilityHead.getFont().getSize() + 5));
+            layout.putConstraint(SpringLayout.WEST, availabilityHead, 5, SpringLayout.EAST, borrowHead);
+            layout.putConstraint(SpringLayout.NORTH, availabilityHead, 5, SpringLayout.SOUTH, refreshButton);
+            page.add(availabilityHead);
 
             lastLeave = dateAppliedHead;
         }
         int i = index;
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+        final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         for (; i < pendingLeaveRequest.size(); i++) {
             int nod = 0;
             try {
@@ -166,7 +193,7 @@ public class ApproveLeavePage {
                     createJOptionPane(Integer.parseInt(s[0]), Integer.parseInt(s[1]), Integer.parseInt(s[2]));
                 }
             });
-            layout.putConstraint(SpringLayout.WEST, dateApplied, 5, SpringLayout.EAST, lId);
+            layout.putConstraint(SpringLayout.WEST, dateApplied, 5, SpringLayout.EAST, lIdHead);
             layout.putConstraint(SpringLayout.NORTH, dateApplied, 5, SpringLayout.SOUTH, lastLeave);
             page.add(dateApplied);
 
@@ -238,9 +265,77 @@ public class ApproveLeavePage {
             layout.putConstraint(SpringLayout.NORTH, reason, 5, SpringLayout.SOUTH, lastLeave);
             page.add(reason);
 
+            JButton borrow = new JButton(pendingLeaveRequest.get(i).getString("borrowleaves"));
+            borrow.setOpaque(false);
+            borrow.setContentAreaFilled(false);
+            borrow.setBorderPainted(false);
+            borrow.setForeground(Color.RED);
+            layout.putConstraint(SpringLayout.WEST, borrow, 5, SpringLayout.EAST, reasonHead);
+            layout.putConstraint(SpringLayout.NORTH, borrow, 5, SpringLayout.SOUTH, lastLeave);
+            page.add(borrow);
+
+            JButton availability = new JButton();
+            try {
+                availability.setIcon(new ImageIcon(ImageIO.read(new File("src/R/drawable/calender.png"))
+                        .getScaledInstance(15, 15, java.awt.Image.SCALE_SMOOTH)));
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+            availability.setOpaque(false);
+            availability.setContentAreaFilled(false);
+            availability.setBorderPainted(false);
+            availability.setForeground(Color.BLUE);
+            availability.setActionCommand(i + "");
+            availability.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    Document levDoc = pendingLeaveRequest.get(Integer.parseInt(e.getActionCommand()));
+                    try {
+                        int[] alreadyOnLeave = getData(levDoc, df);
+                        java.util.Date fDate = df.parse(levDoc.getString("from_date"));
+                        JPanel p = new JPanel();
+                        p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
+                        for (int num : alreadyOnLeave) {
+                            p.add(new JLabel(df.format(fDate) + ": " + num));
+                            Calendar cal = Calendar.getInstance();
+                            cal.setTime(fDate);
+                            cal.add(Calendar.DATE, 1);
+                            fDate = cal.getTime();
+                        }
+                        JOptionPane.showMessageDialog(page, p, "Faculties on leaves each day", JOptionPane.INFORMATION_MESSAGE);
+                    } catch (ParseException | SQLException e1) {
+                        e1.printStackTrace();
+                    }
+                }
+            });
+            layout.putConstraint(SpringLayout.WEST, availability, 5, SpringLayout.EAST, borrowHead);
+            layout.putConstraint(SpringLayout.NORTH, availability, 5, SpringLayout.SOUTH, lastLeave);
+            page.add(availability);
+
             lastLeave = dateApplied;
         }
         page.revalidate();
+    }
+
+    protected int[] getData(Document levDoc, DateFormat df) throws ParseException, SQLException {
+        List<Document> approvedLeaves = null;
+        java.util.Date fDate = df.parse(levDoc.getString("from_date"));
+        java.util.Date tDate = df.parse(levDoc.getString("to_date"));
+        int nod = (int) (tDate.getTime() - fDate.getTime()) / 86400000 + 1;
+        int[] result = new int[nod];
+        approvedLeaves = leavesDb.getAllApprovedLeaves(levDoc.getString("d_id"), new Date(fDate.getTime()),
+                new Date(tDate.getTime()));
+        for (int i = 0; i < result.length; i++) {
+            for (Document doc : approvedLeaves) {
+                if (df.parse(doc.getString("from_date")).compareTo(fDate) <= 0
+                        && df.parse(doc.getString("to_date")).compareTo(fDate) >= 0)
+                    result[i]++;
+            }
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(fDate);
+            cal.add(Calendar.DATE, 1);
+            fDate = cal.getTime();
+        }
+        return result;
     }
 
     void createJOptionPane(int lId, int fId, int nod) {
@@ -257,9 +352,15 @@ public class ApproveLeavePage {
                 JOptionPane.YES_NO_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
         if (result == JOptionPane.YES_OPTION) {
             try {
-                if (facDoc.getString("position").equals("HOD"))
+                if (facDoc.getString("position").equals("HOD")) {
                     leavesDb.hodResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")), newReason.getText());
-                else if (facDoc.getString("position").equals("Dean")) {
+                    // TODO: Comments this lines after adding dean
+                    leavesDb.deanResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")), newReason.getText());
+                    List<Document> toAddTheLeave = db.findFaculties(new Document("f_id", String.valueOf(fId)));
+                    toAddTheLeave.get(0).put("leaves", toAddTheLeave.get(0).getInteger("leaves") - nod);
+                    db.upsertFaculty(toAddTheLeave.get(0));
+                    //
+                } else if (facDoc.getString("position").equals("Dean")) {
                     leavesDb.deanResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")), newReason.getText());
                     List<Document> toAddTheLeave = db.findFaculties(new Document("f_id", String.valueOf(fId)));
                     toAddTheLeave.get(0).put("leaves", toAddTheLeave.get(0).getInteger("leaves") - nod);

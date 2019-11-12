@@ -1,6 +1,5 @@
 package com.sid;
 
-import static com.sid.ActivityMain.df;
 import static com.sid.ActivityMain.db;
 import static com.sid.ActivityMain.depts;
 import static com.sid.ActivityMain.setActivity;
@@ -12,6 +11,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -37,6 +39,9 @@ public class FacultyPage {
     SpringLayout layout;
     public static Document facDoc;
     public static JButton leaveButton, searchButton, logoutButton;
+    final DateTimeFormatter dfoFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+    JTextArea lastArea;
 
     public FacultyPage(Document doc) {
         layout = new SpringLayout();
@@ -100,7 +105,7 @@ public class FacultyPage {
         JButton editButton = null;
         try {
             editButton = new JButton(new ImageIcon(ImageIO.read(new File("src/R/drawable/edit.png"))
-                    .getScaledInstance(15, 15, java.awt.Image.SCALE_SMOOTH)));
+                    .getScaledInstance(20, 20, java.awt.Image.SCALE_SMOOTH)));
         } catch (IOException e1) {
             e1.printStackTrace();
         }
@@ -111,6 +116,21 @@ public class FacultyPage {
         layout.putConstraint(SpringLayout.WEST, editButton, 5, SpringLayout.EAST, name);
         layout.putConstraint(SpringLayout.NORTH, editButton, 5, SpringLayout.SOUTH, leaveButton);
         page.add(editButton);
+
+        JButton addFieldButton = null;
+        try {
+            addFieldButton = new JButton(new ImageIcon(ImageIO.read(new File("src/R/drawable/add.png"))
+                    .getScaledInstance(20, 20, java.awt.Image.SCALE_SMOOTH)));
+        } catch (IOException e1) {
+            e1.printStackTrace();
+        }
+        addFieldButton.setOpaque(false);
+        addFieldButton.setContentAreaFilled(false);
+        addFieldButton.setBorderPainted(false);
+        addFieldButton.setForeground(Color.BLUE);
+        layout.putConstraint(SpringLayout.WEST, addFieldButton, 5, SpringLayout.EAST, editButton);
+        layout.putConstraint(SpringLayout.NORTH, addFieldButton, 5, SpringLayout.SOUTH, leaveButton);
+        page.add(addFieldButton);
 
         JTextArea department = new JTextArea(
                 facDoc.getString("position") + ", " + facDoc.getString("d_id") + " department");
@@ -175,7 +195,7 @@ public class FacultyPage {
         layout.putConstraint(SpringLayout.NORTH, headingWork, 5, SpringLayout.SOUTH, detailsSkillSet);
         page.add(headingWork);
 
-        JTextArea lastArea = headingWork;
+        lastArea = headingWork;
         Document workDoc = (Document) extras.get("Work");
         List<String> workKeys = new ArrayList<>(workDoc.keySet());
         for (String key : workKeys) {
@@ -188,6 +208,8 @@ public class FacultyPage {
             JTextArea work2 = new JTextArea();
             if (key.equals("Date of joining"))
                 work2.setText(df.format((Date) workDoc.get("Date of joining")));
+            else if (key.equals("Department"))
+                work2.setText(facDoc.getString("d_id"));
             else
                 work2.setText(workDoc.getString(key));
             work2.setEditable(false);
@@ -256,6 +278,128 @@ public class FacultyPage {
                 createJOptionPane();
             }
         });
+
+        addFieldButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                createJOptionPane1("", "");
+            }
+        });
+        setExtras(0);
+    }
+
+    void setExtras(int index) {
+        Document extras = (Document) facDoc.get("extra");
+        List<String> keys = new ArrayList<>(extras.keySet());
+        keys.remove("About Me");
+        keys.remove("Skill Set");
+        keys.remove("Work");
+        keys.remove("Personal");
+        for (String key : keys) {
+            JLabel heading = new JLabel(key);
+            heading.setCursor(null);
+            heading.setOpaque(false);
+            heading.setFocusable(false);
+            heading.setFont(new Font(heading.getFont().getName(), Font.BOLD, heading.getFont().getSize() + 5));
+            layout.putConstraint(SpringLayout.WEST, heading, 5, SpringLayout.WEST, page);
+            layout.putConstraint(SpringLayout.NORTH, heading, 5, SpringLayout.SOUTH, lastArea);
+            page.add(heading);
+
+            JButton editButton = null;
+            try {
+                editButton = new JButton(new ImageIcon(ImageIO.read(new File("src/R/drawable/edit.png"))
+                        .getScaledInstance(15, 15, java.awt.Image.SCALE_SMOOTH)));
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+            editButton.setOpaque(false);
+            editButton.setContentAreaFilled(false);
+            editButton.setBorderPainted(false);
+            editButton.setForeground(Color.BLUE);
+            editButton.setActionCommand(key + "~" + extras.getString(key));
+            layout.putConstraint(SpringLayout.WEST, editButton, 5, SpringLayout.EAST, heading);
+            layout.putConstraint(SpringLayout.NORTH, editButton, 5, SpringLayout.SOUTH, lastArea);
+            editButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    String s[] = e.getActionCommand().split("~", 2);
+                    createJOptionPane1(s[0], s[1]);
+                }
+            });
+            page.add(editButton);
+
+            JButton deleteButton = null;
+            try {
+                deleteButton = new JButton(new ImageIcon(ImageIO.read(new File("src/R/drawable/delete.png"))
+                        .getScaledInstance(15, 15, java.awt.Image.SCALE_SMOOTH)));
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+            deleteButton.setOpaque(false);
+            deleteButton.setContentAreaFilled(false);
+            deleteButton.setBorderPainted(false);
+            deleteButton.setForeground(Color.BLUE);
+            deleteButton.setActionCommand(key);
+            layout.putConstraint(SpringLayout.WEST, deleteButton, 5, SpringLayout.EAST, editButton);
+            layout.putConstraint(SpringLayout.NORTH, deleteButton, 5, SpringLayout.SOUTH, lastArea);
+            deleteButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    int result = JOptionPane.showConfirmDialog(page, "Are you sure you want to delete this field?",
+                            "Warning", JOptionPane.YES_NO_OPTION);
+                    if (result == JOptionPane.YES_OPTION) {
+                        Document doc = ((Document) facDoc.get("extra"));
+                        doc.remove(e.getActionCommand());
+                        facDoc.put("extra", doc);
+                        db.upsertFaculty(facDoc);
+                        logoutButton.doClick();
+                        loginButton.doClick();
+                    }
+                }
+            });
+            page.add(deleteButton);
+
+            JTextArea details = new JTextArea(extras.getString(key));
+            details.setEditable(false);
+            details.setCursor(null);
+            details.setOpaque(false);
+            details.setFocusable(false);
+            details.setLineWrap(true);
+            details.setWrapStyleWord(true);
+            details.setColumns(150);
+            layout.putConstraint(SpringLayout.WEST, details, 5, SpringLayout.WEST, page);
+            layout.putConstraint(SpringLayout.NORTH, details, 5, SpringLayout.SOUTH, heading);
+            page.add(details);
+            lastArea = details;
+        }
+    }
+
+    void createJOptionPane1(String s1, String s2) {
+        JTextField newHeading = new JTextField(30);
+        JTextArea newDetails = new JTextArea(8, 30);
+        JScrollPane aboutMe = new JScrollPane(newDetails);
+
+        newHeading.setText(s1);
+        newDetails.setText(s2);
+
+        JPanel addDetailFac = new JPanel();
+        addDetailFac.setLayout(new BoxLayout(addDetailFac, BoxLayout.PAGE_AXIS));
+        addDetailFac.add(new JLabel("Heading: *", JLabel.LEFT));
+        addDetailFac.add(newHeading);
+        addDetailFac.add(new JLabel("Details: *", JLabel.LEFT));
+        addDetailFac.add(aboutMe);
+
+        int result = JOptionPane.showConfirmDialog(page, addDetailFac, "Please enter the followings",
+                JOptionPane.OK_CANCEL_OPTION);
+        if (result == JOptionPane.OK_OPTION) {
+            if (newHeading.getText().isEmpty() || newDetails.getText().isEmpty())
+                JOptionPane.showMessageDialog(page, "All the fields must be Filled. Try Again");
+            else {
+                Document extras = (Document) facDoc.get("extra");
+                extras.put(newHeading.getText(), newDetails.getText());
+                facDoc.put("extra", extras);
+                db.upsertFaculty(facDoc);
+                logoutButton.doClick();
+                loginButton.doClick();
+            }
+        }
     }
 
     void createJOptionPane() {

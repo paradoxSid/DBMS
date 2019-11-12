@@ -2,6 +2,8 @@ CREATE TABLE allLeaves(
 	l_id INT NOT NULL,
 	f_id INT NOT NULL,
 	application_status VARCHAR(50),
+	notifyUser BOOLEAN NOT NULL,
+	borrowLeaves INT NOT NULL,
 
 	PRIMARY KEY(l_id)
 );
