@@ -124,6 +124,24 @@ public class LeavePage {
             page.add(approveButton);
             leftButton = approveButton;
         }
+        if (facDoc.getString("position").equals("Director")) {
+            try {
+                pendingLeaveRequest = leavesDb.leavesVisibleToDirector();
+            } catch (NumberFormatException | SQLException e1) {
+                e1.printStackTrace();
+            }
+            approveButton = new JButton("Pending Leave Requests (" + pendingLeaveRequest.size() + ")");
+            layout.putConstraint(SpringLayout.WEST, approveButton, 5, SpringLayout.EAST, refreshButton);
+            layout.putConstraint(SpringLayout.NORTH, approveButton, 5, SpringLayout.NORTH, page);
+            approveButton.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    ApproveLeavePage approveLeavePage = new ApproveLeavePage(facDoc);
+                    setActivity(approveLeavePage.page);
+                }
+            });
+            page.add(approveButton);
+            leftButton = approveButton;
+        }
 
         backButton = new JButton("Back");
         backButton.setOpaque(false);
@@ -465,20 +483,31 @@ public class LeavePage {
                         else
                             lId = leavesDb.editLeaveEntry(Integer.parseInt(facDoc.getString("f_id")),
                                     facDoc.getString("d_id"), Date.valueOf(newFromDate.getText()),
-                                    Date.valueOf(newToDate.getText()), newReason.getText(), Integer.parseInt(oldLID), 0);
+                                    Date.valueOf(newToDate.getText()), newReason.getText(), Integer.parseInt(oldLID),
+                                    0);
 
-                        if (facDoc.getString("position").equals("HOD")) {
+                        if (facDoc.getString("position").equals("HOD"))
                             leavesDb.hodResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
+                                    newReason.getText(), "HOD");
+                        else if (facDoc.getString("position").equals("Dean"))
+                            leavesDb.hodResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
+                                    newReason.getText(), "Dean");
+                        else if (facDoc.getString("position").equals("Associative Dean"))
+                            leavesDb.hodResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
+                                    newReason.getText(), "ADea");
+                        else if (facDoc.getString("position").equals("Director")) {
+                            leavesDb.hodResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
+                                    newReason.getText(), "Head");
+                            leavesDb.directorResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
                                     newReason.getText());
-                            // TODO: Comments this lines after adding dean
-                            leavesDb.deanResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
-                                    newReason.getText());
-                            List<Document> toRemoveTheLeave = db
-                                    .findFaculties(new Document("f_id", facDoc.getString("f_id")));
-                            toRemoveTheLeave.get(0).put("leaves", toRemoveTheLeave.get(0).getInteger("leaves") - nod);
-                            db.upsertFaculty(toRemoveTheLeave.get(0));
-                            //
                         }
+                        // TODO: Comments this lines after adding dean
+                        // List<Document> toRemoveTheLeave = db
+                        // .findFaculties(new Document("f_id", facDoc.getString("f_id")));
+                        // toRemoveTheLeave.get(0).put("leaves",
+                        // toRemoveTheLeave.get(0).getInteger("leaves") - nod);
+                        // db.upsertFaculty(toRemoveTheLeave.get(0));
+                        //
 
                         leaves = leavesDb.getAllLeaves(Integer.parseInt(facDoc.getString("f_id")));
                         setUpLeaves(leaves.size() - 1);
@@ -509,19 +538,30 @@ public class LeavePage {
                                             Date.valueOf(newToDate.getText()), newReason.getText(),
                                             Integer.parseInt(oldLID), ltb);
 
-                                if (facDoc.getString("position").equals("HOD")) {
+                                if (facDoc.getString("position").equals("HOD"))
                                     leavesDb.hodResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
+                                            newReason.getText(), "HOD");
+                                else if (facDoc.getString("position").equals("Dean"))
+                                    leavesDb.hodResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
+                                            newReason.getText(), "Dean");
+                                else if (facDoc.getString("position").equals("Associative Dean"))
+                                    leavesDb.hodResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
+                                            newReason.getText(), "ADea");
+                                else if (facDoc.getString("position").equals("Director")) {
+                                    leavesDb.hodResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
+                                            newReason.getText(), "Head");
+                                    leavesDb.directorResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
                                             newReason.getText());
-                                    // TODO: Comments this lines after adding dean
-                                    leavesDb.deanResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
-                                            newReason.getText());
-                                    List<Document> toRemoveTheLeave = db
-                                            .findFaculties(new Document("f_id", facDoc.getString("f_id")));
-                                    toRemoveTheLeave.get(0).put("leaves",
-                                            toRemoveTheLeave.get(0).getInteger("leaves") - nod);
-                                    db.upsertFaculty(toRemoveTheLeave.get(0));
-                                    //
                                 }
+                                // TODO: Comments this lines after adding dean
+                                // leavesDb.deanResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
+                                // newReason.getText());
+                                // List<Document> toRemoveTheLeave = db
+                                // .findFaculties(new Document("f_id", facDoc.getString("f_id")));
+                                // toRemoveTheLeave.get(0).put("leaves",
+                                // toRemoveTheLeave.get(0).getInteger("leaves") - nod);
+                                // db.upsertFaculty(toRemoveTheLeave.get(0));
+                                //
 
                                 leaves = leavesDb.getAllLeaves(Integer.parseInt(facDoc.getString("f_id")));
                                 setUpLeaves(leaves.size() - 1);

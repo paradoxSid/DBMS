@@ -99,7 +99,7 @@ public class ConnectToPostgres {
         return oldLID;
     }
 
-    public void hodResponse(int lId, boolean accepted, int hodId, String comments) throws SQLException {
+    public void hodResponse(int lId, boolean accepted, int hodId, String comments, String string) throws SQLException {
         print("hodResponse");
         stmt = c.createStatement();
 
@@ -119,7 +119,7 @@ public class ConnectToPostgres {
             pstmt.setString(7, rs.getString("commentsFac"));
             pstmt.setString(8, "HOD");
             if (rs.getInt("f_id") == hodId)
-                pstmt.setString(8, "MySelfHOD");
+                pstmt.setString(8, "MySelf" + string);
             pstmt.setInt(9, hodId);
             pstmt.setString(10, comments);
             pstmt.setObject(11, new Date(new java.util.Date().getTime()));
@@ -207,6 +207,70 @@ public class ConnectToPostgres {
             pstmt.setString(7, rs.getString("commentsFac"));
             pstmt.setString(8, "Dean");
             pstmt.setInt(9, deanId);
+            pstmt.setString(10, comments);
+            pstmt.setObject(11, new Date(new java.util.Date().getTime()));
+            pstmt.executeUpdate();
+
+            stmt.executeUpdate(
+                    "UPDATE allLeaves SET application_status = 'rejectedLeaves', notifyUser = true WHERE l_id = " + lId
+                            + ";");
+
+            stmt.executeUpdate("DELETE FROM approved1Leaves WHERE l_id = " + lId + ";");
+        }
+
+        stmt.close();
+        c.commit();
+    }
+
+    public void directorResponse(int lId, boolean accepted, int dId, String comments) throws SQLException {
+        print("directorResponse");
+        stmt = c.createStatement();
+
+        ResultSet rs = stmt.executeQuery("SELECT * FROM approved1Leaves WHERE l_id = " + lId + ";");
+        rs.next();
+
+        if (accepted) {
+            String sql1 = "INSERT INTO approvedLeaves(l_id, application_date, f_id, d_id, from_date, to_date, commentsFac,"
+                    + " auth1, auth1id, auth1comments, auth1ResponseTime, "
+                    + "auth2, auth2id, auth2comments, auth2ResponseTime)" + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?);";
+            PreparedStatement pstmt = c.prepareStatement(sql1, Statement.RETURN_GENERATED_KEYS);
+            pstmt.setInt(1, rs.getInt("l_id"));
+            pstmt.setObject(2, rs.getDate("application_date"));
+            pstmt.setInt(3, rs.getInt("f_id"));
+            pstmt.setString(4, rs.getString("d_id"));
+            pstmt.setObject(5, rs.getDate("from_date"));
+            pstmt.setObject(6, rs.getDate("to_date"));
+            pstmt.setString(7, rs.getString("commentsFac"));
+            pstmt.setString(8, rs.getString("auth1"));
+            pstmt.setInt(9, rs.getInt("auth1id"));
+            pstmt.setString(10, rs.getString("auth1comments"));
+            pstmt.setObject(11, rs.getObject("auth1ResponseTime"));
+            pstmt.setString(12, "Director");
+            if (rs.getInt("f_id") == dId)
+                pstmt.setString(12, "MySelfHead");
+            pstmt.setInt(13, dId);
+            pstmt.setString(14, comments);
+            pstmt.setObject(15, new Date(new java.util.Date().getTime()));
+            pstmt.executeUpdate();
+
+            stmt.executeUpdate(
+                    "UPDATE allLeaves SET application_status = 'approvedLeaves', notifyUser = true WHERE l_id = " + lId
+                            + ";");
+
+            stmt.executeUpdate("DELETE FROM approved1Leaves WHERE l_id = " + lId + ";");
+        } else {
+            String sql1 = "INSERT INTO rejectedLeaves(l_id, application_date, f_id, d_id, from_date, to_date, commentsFac,"
+                    + " auth, authId, authComments, authResponseTime)" + " VALUES (?,?,?,?,?,?,?,?,?,?,?);";
+            PreparedStatement pstmt = c.prepareStatement(sql1, Statement.RETURN_GENERATED_KEYS);
+            pstmt.setInt(1, rs.getInt("l_id"));
+            pstmt.setObject(2, rs.getDate("application_date"));
+            pstmt.setInt(3, rs.getInt("f_id"));
+            pstmt.setString(4, rs.getString("d_id"));
+            pstmt.setObject(5, rs.getDate("from_date"));
+            pstmt.setObject(6, rs.getDate("to_date"));
+            pstmt.setString(7, rs.getString("commentsFac"));
+            pstmt.setString(8, "Director");
+            pstmt.setInt(9, dId);
             pstmt.setString(10, comments);
             pstmt.setObject(11, new Date(new java.util.Date().getTime()));
             pstmt.executeUpdate();
@@ -360,7 +424,44 @@ public class ConnectToPostgres {
                     .append("commentsfac", String.valueOf(rs.getString("commentsfac")))
                     .append("hod_id", String.valueOf(rs.getInt("auth1id")))
                     .append("commentshod", String.valueOf(rs.getString("auth1comments")))
-                    .append("hodResponseTime", String.valueOf(rs.getObject("auth1responsetime")));
+                    .append("hodResponseTime", String.valueOf(rs.getObject("auth1responsetime")))
+                    .append("dean_id", String.valueOf(rs.getInt("auth2id")))
+                    .append("commentsdean", String.valueOf(rs.getString("auth2comments")))
+                    .append("deanResponseTime", String.valueOf(rs.getObject("auth2responsetime")));
+            allApprovedLeaves.add(doc);
+        }
+        stmt.close();
+        Collections.sort(allApprovedLeaves, leaveIdComparator);
+        return allApprovedLeaves;
+    }
+
+    public List<Document> getAllApprovedLeaves(Date fDate, Date tDate) throws SQLException {
+        print("getAllApprovedLeaves");
+        List<Document> allApprovedLeaves = new ArrayList<>();
+        stmt = c.createStatement();
+        String sql1 = "SELECT * FROM approvedleaves WHERE from_date <= ? AND to_date >= ?;";
+        PreparedStatement pstmt = c.prepareStatement(sql1, Statement.RETURN_GENERATED_KEYS);
+        pstmt.setObject(1, tDate);
+        pstmt.setObject(2, fDate);
+        ResultSet rs = pstmt.executeQuery();
+        while (rs.next()) {
+            Statement stmt1 = c.createStatement();
+            ResultSet rs1 = stmt1.executeQuery("SELECT * FROM allleaves WHERE l_id = " + rs.getInt("l_id") + ";");
+            rs1.next();
+            Document doc = new Document().append("l_id", String.valueOf(rs.getInt("l_id")))
+                    .append("borrowleaves", String.valueOf(rs1.getInt("borrowleaves")))
+                    .append("application_date", String.valueOf(rs.getObject("application_date")))
+                    .append("f_id", String.valueOf(rs.getInt("f_id")))
+                    .append("d_id", String.valueOf(rs.getString("d_id")))
+                    .append("from_date", String.valueOf(rs.getObject("from_date")))
+                    .append("to_date", String.valueOf(rs.getObject("to_date")))
+                    .append("commentsfac", String.valueOf(rs.getString("commentsfac")))
+                    .append("hod_id", String.valueOf(rs.getInt("auth1id")))
+                    .append("commentshod", String.valueOf(rs.getString("auth1comments")))
+                    .append("hodResponseTime", String.valueOf(rs.getObject("auth1responsetime")))
+                    .append("dean_id", String.valueOf(rs.getInt("auth2id")))
+                    .append("commentsdean", String.valueOf(rs.getString("auth2comments")))
+                    .append("deanResponseTime", String.valueOf(rs.getObject("auth2responsetime")));
             allApprovedLeaves.add(doc);
         }
         stmt.close();

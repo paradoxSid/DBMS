@@ -146,14 +146,15 @@ public class FacultyPageView {
             layout.putConstraint(SpringLayout.WEST, work2, 5, SpringLayout.EAST, work1);
             layout.putConstraint(SpringLayout.NORTH, work2, 5, SpringLayout.SOUTH, lastArea);
 
-            if (key.equals("HOD ID")) {
-                for (Document doc : depts) {
-                    if (doc.getString("d_id").equals(facDoc.getString("d_id"))) {
-                        Document allhod = (Document) doc.get("hod");
-                        work2.setText(allhod.getString(String.valueOf(allhod.size() - 1)));
+            if (!facDoc.getString("d_id").equals("CCF"))
+                if (key.equals("HOD ID")) {
+                    for (Document doc : depts) {
+                        if (doc.getString("d_id").equals(facDoc.getString("d_id"))) {
+                            Document allhod = (Document) doc.get("hod");
+                            work2.setText(allhod.getString(String.valueOf(allhod.size() - 1)));
+                        }
                     }
                 }
-            }
 
             page.add(work2);
             lastArea = work2;
