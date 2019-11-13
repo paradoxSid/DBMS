@@ -86,6 +86,19 @@ public class ConnectToDB {
         return inserted.get(0);
     }
 
+	public Document addNewDepartment(String name, String position, String id) {
+        print("addNewDepartment CCF");
+        Document insert = new Document().append("d_id", name).append(position, new Document("0", id));
+        collectionDepartment.insertOne(insert);
+        List<Document> inserted = collectionDepartment.find(insert).into(new ArrayList<Document>());
+        return inserted.get(0);
+	}
+
+    public void upsertDept(Document doc) {
+        print("upsertDept");
+        collectionDepartment.replaceOne(Filters.eq("d_id", doc.getString("d_id")), doc);
+    }
+
     public void deleteDepartment(String id) {
         print("deleteDepartment");
         collectionDepartment.deleteOne(new Document().append("d_id", id));
@@ -131,11 +144,6 @@ public class ConnectToDB {
     public void upsertFaculty(Document doc) {
         print("upsertFaculty");
         collectionFaculty.replaceOne(Filters.eq("f_id", doc.getString("f_id")), doc);
-    }
-
-    public void upsertDept(Document doc) {
-        print("upsertDept");
-        collectionDepartment.replaceOne(Filters.eq("d_id", doc.getString("d_id")), doc);
     }
 
     public List<Document> findFaculties(Document filter) {

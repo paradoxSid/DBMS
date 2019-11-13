@@ -44,6 +44,7 @@ public class AdminPage {
     JButton ccfPosition = new JButton("Position");
     JButton ccfName = new JButton("Name");
     JButton ccfId = new JButton("Id");
+    JButton ccfEdit = new JButton("Edit");
 
     public AdminPage() {
         page = new JPanel();
@@ -197,12 +198,27 @@ public class AdminPage {
         layout.putConstraint(SpringLayout.NORTH, ccfId, 5, SpringLayout.SOUTH, addDepartmentButton);
         page.add(ccfId);
 
+        ccfEdit.setOpaque(false);
+        ccfEdit.setContentAreaFilled(false);
+        ccfEdit.setBorderPainted(false);
+        ccfEdit.setFont(new Font(ccfEdit.getFont().getName(), Font.BOLD, ccfEdit.getFont().getSize() + 5));
+        layout.putConstraint(SpringLayout.WEST, ccfEdit, 5, SpringLayout.EAST, ccfId);
+        layout.putConstraint(SpringLayout.NORTH, ccfEdit, 5, SpringLayout.SOUTH, addDepartmentButton);
+        page.add(ccfEdit);
+
         lastCCF = ccfPosition;
         for (Document doc : faculties.get("CCF")) {
 
             JButton position = new JButton(doc.getString("position"));
             JButton name = new JButton(doc.getString("name"));
             JButton id = new JButton(doc.getString("f_id"));
+            JButton edit = new JButton();
+            try {
+                edit = new JButton(new ImageIcon(ImageIO.read(new File("src/R/drawable/edit.png")).getScaledInstance(15,
+                        15, java.awt.Image.SCALE_SMOOTH)));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             position.setOpaque(false);
             position.setContentAreaFilled(false);
@@ -219,6 +235,88 @@ public class AdminPage {
             id.setBorderPainted(false);
             id.setForeground(Color.BLUE);
 
+            edit.setOpaque(false);
+            edit.setContentAreaFilled(false);
+            edit.setBorderPainted(false);
+            edit.setForeground(Color.BLUE);
+            edit.setActionCommand(doc.getString("position"));
+            edit.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    JTextField fac_id = new JTextField(5);
+
+                    JPanel newfac = new JPanel();
+                    newfac.setLayout(new BoxLayout(newfac, BoxLayout.PAGE_AXIS));
+                    newfac.add(new JLabel("Faculty Id: *"));
+                    newfac.add(fac_id);
+
+                    int result = JOptionPane.showConfirmDialog(page, newfac, "Please enter the followings",
+                            JOptionPane.OK_CANCEL_OPTION);
+                    if (result == JOptionPane.OK_OPTION) {
+                        String hod_id = fac_id.getText();
+
+                        Document temp_dept = null;
+                        for (Document doc : depts) {
+                            if (doc.getString("d_id").equals("CCF")) {
+                                temp_dept = doc;
+                                break;
+                            }
+                        }
+
+                        Document newHodDocument = null;
+                        boolean flag = true;
+                        for (Document doc : allFaculties) {
+                            if (doc.getString("f_id").equals(hod_id)) {
+                                if (doc.getString("position").equals("HOD") || doc.getString("position").equals("Dean")
+                                        || doc.getString("position").equals("Associative Dean")
+                                        || doc.getString("position").equals("Director")) {
+                                    flag = false;
+                                    break;
+                                }
+                                newHodDocument = doc;
+                                break;
+                            }
+                        }
+
+                        String hod_faculty = null;
+                        if (newHodDocument != null) {
+                            Document tempDoc = ((Document) temp_dept.get(e.getActionCommand()));
+                            hod_faculty = tempDoc.getString(String.valueOf(tempDoc.size() - 1));
+                            for (Document doc : faculties.get("CCF")) {
+                                if (doc.getString("f_id").equals(hod_faculty)) {
+                                    allFaculties.remove(doc);
+                                    allFaculties.remove(newHodDocument);
+                                    faculties.get("CCF").remove(doc);
+                                    faculties.get("CCF").remove(newHodDocument);
+                                    doc.put("position", "Faculty");
+                                    doc.put("d_id", newHodDocument.getString("d_id"));
+                                    db.upsertFaculty(doc);
+                                    newHodDocument.put("position", e.getActionCommand());
+                                    newHodDocument.put("d_id", "CCF");
+                                    db.upsertFaculty(newHodDocument);
+                                    allFaculties.add(doc);
+                                    allFaculties.add(newHodDocument);
+                                    faculties.get("CCF").add(doc);
+                                    faculties.get("CCF").add(newHodDocument);
+                                    break;
+                                }
+                            }
+                            tempDoc.put(String.valueOf(tempDoc.size()), fac_id.getText());
+                            temp_dept.put(e.getActionCommand(), tempDoc);
+                            db.upsertDept(temp_dept);
+                            logoutButton.doClick();
+                            LoginPage.loginButton.doClick();
+                        } else if (!flag)
+                            JOptionPane.showMessageDialog(page, "Entered faculty is alredy having some position.");
+                        else
+                            JOptionPane.showMessageDialog(page,
+                                    "No faculty with id " + fac_id.getText() + " found in any department.");
+                    }
+
+                }
+
+            });
+
             layout.putConstraint(SpringLayout.WEST, position, 5, SpringLayout.WEST, page);
             layout.putConstraint(SpringLayout.NORTH, position, 5, SpringLayout.SOUTH, lastCCF);
 
@@ -228,9 +326,13 @@ public class AdminPage {
             layout.putConstraint(SpringLayout.WEST, id, 8, SpringLayout.EAST, ccfName);
             layout.putConstraint(SpringLayout.NORTH, id, 5, SpringLayout.SOUTH, lastCCF);
 
+            layout.putConstraint(SpringLayout.WEST, edit, 8, SpringLayout.EAST, ccfId);
+            layout.putConstraint(SpringLayout.NORTH, edit, 5, SpringLayout.SOUTH, lastCCF);
+
             page.add(position);
             page.add(name);
             page.add(id);
+            page.add(edit);
             lastCCF = position;
         }
     }
@@ -264,12 +366,25 @@ public class AdminPage {
                     faculties.put("CCF", new ArrayList<Document>());
                 faculties.get("CCF").add(insertedFac);
                 if (position.equals("Director")) {
-                    Document insertedDept = db.addNewDepartment("CCF", "-1");
+                    Document insertedDept = db.addNewDepartment("CCF", "Director", id.getText());
                     depts.add(insertedDept);
                     addCCF("Dean");
                 }
-                if (position.equals("Dean"))
+                if (position.equals("Dean")) {
+                    Document d = depts.get(0);
+                    depts.remove(d);
+                    d.append("Dean", new Document("0", id.getText()));
+                    db.upsertDept(d);
+                    depts.add(d);
                     addCCF("Associative Dean");
+                }
+                if (position.equals("Associative Dean")) {
+                    Document d = depts.get(0);
+                    depts.remove(d);
+                    d.append("Associative Dean", new Document("0", id.getText()));
+                    db.upsertDept(d);
+                    depts.add(d);
+                }
             }
         }
 
@@ -387,31 +502,37 @@ public class AdminPage {
                             // allFaculties.remove(temp);
                             Document tempDoc = ((Document) temp_dept.get("hod"));
                             hod_faculty = tempDoc.getString(String.valueOf(tempDoc.size() - 1));
-
-                            for (Document doc : faculties.get(e.getActionCommand())) {
-                                if (doc.getString("f_id").equals(hod_faculty)) {
-                                    allFaculties.remove(doc);
-                                    allFaculties.remove(newHodDocument);
-                                    faculties.get(e.getActionCommand()).remove(doc);
-                                    faculties.get(e.getActionCommand()).remove(newHodDocument);
-                                    doc.put("position", "Faculty");
-                                    db.upsertFaculty(doc);
-                                    newHodDocument.put("position", "HOD");
-                                    db.upsertFaculty(newHodDocument);
-                                    allFaculties.add(doc);
-                                    allFaculties.add(newHodDocument);
-                                    faculties.get(e.getActionCommand()).add(doc);
-                                    faculties.get(e.getActionCommand()).add(newHodDocument);
-                                    break;
+                            boolean flag = true;
+                            if (hod_faculty.equals(hod_id))
+                                flag = false;
+                            if (flag) {
+                                for (Document doc : faculties.get(e.getActionCommand())) {
+                                    if (doc.getString("f_id").equals(hod_faculty)) {
+                                        allFaculties.remove(doc);
+                                        allFaculties.remove(newHodDocument);
+                                        faculties.get(e.getActionCommand()).remove(doc);
+                                        faculties.get(e.getActionCommand()).remove(newHodDocument);
+                                        doc.put("position", "Faculty");
+                                        db.upsertFaculty(doc);
+                                        newHodDocument.put("position", "HOD");
+                                        db.upsertFaculty(newHodDocument);
+                                        allFaculties.add(doc);
+                                        allFaculties.add(newHodDocument);
+                                        faculties.get(e.getActionCommand()).add(doc);
+                                        faculties.get(e.getActionCommand()).add(newHodDocument);
+                                        break;
+                                    }
                                 }
-                            }
-                            tempDoc.put(String.valueOf(tempDoc.size()), fac_id.getText());
-                            temp_dept.put("hod", tempDoc);
-                            db.upsertDept(temp_dept);
-                            logoutButton.doClick();
-                            LoginPage.loginButton.doClick();
+                                tempDoc.put(String.valueOf(tempDoc.size()), fac_id.getText());
+                                temp_dept.put("hod", tempDoc);
+                                db.upsertDept(temp_dept);
+                                logoutButton.doClick();
+                                LoginPage.loginButton.doClick();
+                            } else
+                                JOptionPane.showMessageDialog(page, "Entered faculty is alredy having some position.");
                         } else
-                            JOptionPane.showMessageDialog(page, "No faculty with id " + fac_id.getText() + " found in " + e.getActionCommand() + ".");
+                            JOptionPane.showMessageDialog(page, "No faculty with id " + fac_id.getText() + " found in "
+                                    + e.getActionCommand() + ".");
                     }
                 }
             });

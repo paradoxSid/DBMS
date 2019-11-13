@@ -77,7 +77,7 @@ public class ConnectToPostgres {
         print("editLeaveEntry");
         stmt = c.createStatement();
 
-        stmt.executeUpdate("UPDATE allLeaves SET application_status = 'newLeaves', notifyUser = true, brrowleaves = "
+        stmt.executeUpdate("UPDATE allLeaves SET application_status = 'newLeaves', notifyUser = true, borrowleaves = "
                 + ltb + " WHERE l_id = " + oldLID + ";");
         c.commit();
 
@@ -290,7 +290,7 @@ public class ConnectToPostgres {
             ResultSet rs1 = stmt1.executeQuery("SELECT * FROM allleaves WHERE l_id = " + rs.getInt("l_id") + ";");
             rs1.next();
             Document doc = new Document().append("l_id", String.valueOf(rs.getInt("l_id")))
-            .append("borrowleaves", String.valueOf(rs1.getInt("borrowleaves")))
+                    .append("borrowleaves", String.valueOf(rs1.getInt("borrowleaves")))
                     .append("application_date", String.valueOf(rs.getObject("application_date")))
                     .append("f_id", String.valueOf(rs.getInt("f_id")))
                     .append("d_id", String.valueOf(rs.getString("d_id")))
@@ -319,7 +319,7 @@ public class ConnectToPostgres {
             ResultSet rs1 = stmt1.executeQuery("SELECT * FROM allleaves WHERE l_id = " + rs.getInt("l_id") + ";");
             rs1.next();
             Document doc = new Document().append("l_id", String.valueOf(rs.getInt("l_id")))
-            .append("borrowleaves", String.valueOf(rs1.getInt("borrowleaves")))
+                    .append("borrowleaves", String.valueOf(rs1.getInt("borrowleaves")))
                     .append("application_date", String.valueOf(rs.getObject("application_date")))
                     .append("f_id", String.valueOf(rs.getInt("f_id")))
                     .append("d_id", String.valueOf(rs.getString("d_id")))
@@ -347,7 +347,11 @@ public class ConnectToPostgres {
         pstmt.setObject(2, fDate);
         ResultSet rs = pstmt.executeQuery();
         while (rs.next()) {
+            Statement stmt1 = c.createStatement();
+            ResultSet rs1 = stmt1.executeQuery("SELECT * FROM allleaves WHERE l_id = " + rs.getInt("l_id") + ";");
+            rs1.next();
             Document doc = new Document().append("l_id", String.valueOf(rs.getInt("l_id")))
+                    .append("borrowleaves", String.valueOf(rs1.getInt("borrowleaves")))
                     .append("application_date", String.valueOf(rs.getObject("application_date")))
                     .append("f_id", String.valueOf(rs.getInt("f_id")))
                     .append("d_id", String.valueOf(rs.getString("d_id")))

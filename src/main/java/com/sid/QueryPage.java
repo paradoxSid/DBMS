@@ -29,27 +29,31 @@ public class QueryPage {
     JRadioButton last = null;
     JButton facultyName, deptName, fac_id, facPosition;
     JButton backButton;
-    List <JButton> buttons = new ArrayList<>();
+    List<JButton> buttons = new ArrayList<>();
+    JTextField search_text;
+    JButton searchButton;
+    JRadioButton faculty_wise;
+    JRadioButton department_wise;
 
     public QueryPage() {
-    page.setLayout(layout);
+        page.setLayout(layout);
 
-        final JTextField search_text = new JTextField(18);
+        search_text = new JTextField(18);
         layout.putConstraint(SpringLayout.WEST, search_text, 5, SpringLayout.WEST, page);
         layout.putConstraint(SpringLayout.NORTH, search_text, 5, SpringLayout.NORTH, page);
         page.add(search_text);
 
-        JButton SearchButton = new JButton("Search");
-        layout.putConstraint(SpringLayout.WEST, SearchButton, 5, SpringLayout.EAST, search_text);
-        layout.putConstraint(SpringLayout.NORTH, SearchButton, 5, SpringLayout.NORTH, page);
-        page.add(SearchButton);
+        searchButton = new JButton("Search");
+        layout.putConstraint(SpringLayout.WEST, searchButton, 5, SpringLayout.EAST, search_text);
+        layout.putConstraint(SpringLayout.NORTH, searchButton, 5, SpringLayout.NORTH, page);
+        page.add(searchButton);
 
         backButton = new JButton("Back");
         backButton.setOpaque(false);
         backButton.setContentAreaFilled(false);
         backButton.setBorderPainted(false);
         backButton.setForeground(Color.RED);
-        layout.putConstraint(SpringLayout.WEST, backButton, 5, SpringLayout.EAST, SearchButton);
+        layout.putConstraint(SpringLayout.WEST, backButton, 5, SpringLayout.EAST, searchButton);
         layout.putConstraint(SpringLayout.NORTH, backButton, 5, SpringLayout.NORTH, page);
         page.add(backButton);
 
@@ -57,57 +61,50 @@ public class QueryPage {
             public void actionPerformed(ActionEvent e) {
                 setActivity(null);
             }
-
         });
 
-
-
-
-        final JRadioButton Faculty_wise = new JRadioButton("Faculty");
-        Faculty_wise.setSelected(true);
+        faculty_wise = new JRadioButton("Faculty");
+        faculty_wise.setSelected(true);
         ButtonGroup bg = new ButtonGroup();
-        layout.putConstraint(SpringLayout.WEST, Faculty_wise, 5, SpringLayout.WEST, search_text);
-        layout.putConstraint(SpringLayout.NORTH, Faculty_wise, 5, SpringLayout.SOUTH, search_text);
-        page.add(Faculty_wise);
-        bg.add(Faculty_wise);
+        layout.putConstraint(SpringLayout.WEST, faculty_wise, 5, SpringLayout.WEST, search_text);
+        layout.putConstraint(SpringLayout.NORTH, faculty_wise, 5, SpringLayout.SOUTH, search_text);
+        page.add(faculty_wise);
+        bg.add(faculty_wise);
 
-        final JRadioButton Department_wise = new JRadioButton("Department");
-        layout.putConstraint(SpringLayout.WEST, Department_wise, 5, SpringLayout.EAST, Faculty_wise);
-        layout.putConstraint(SpringLayout.NORTH, Department_wise, 5, SpringLayout.SOUTH, search_text);
-        page.add(Department_wise);
-        bg.add(Department_wise);
-        last = Department_wise;
+        department_wise = new JRadioButton("Department");
+        layout.putConstraint(SpringLayout.WEST, department_wise, 5, SpringLayout.EAST, faculty_wise);
+        layout.putConstraint(SpringLayout.NORTH, department_wise, 5, SpringLayout.SOUTH, search_text);
+        page.add(department_wise);
+        bg.add(department_wise);
+        last = department_wise;
 
-
-        SearchButton.addActionListener(new ActionListener() {
-
+        searchButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-
-                if (search_text.getText().isEmpty() || (!Faculty_wise.isSelected() && !Department_wise.isSelected())) {
+                if (search_text.getText().isEmpty() || (!faculty_wise.isSelected() && !department_wise.isSelected())) {
                     JOptionPane.showMessageDialog(page, "Fields cannot be empty");
                     return;
                 }
-                if(!buttons.isEmpty())
+                if (!buttons.isEmpty())
                     removeLastSearchResult();
-                if (Department_wise.isSelected()) {
+                if (department_wise.isSelected()) {
                     String dep_Name = search_text.getText();
                     Document filter = new Document("d_id", dep_Name);
                     result = db.findFaculties(filter); // result have all faculty
                     setfaculty(0);
 
                     page.revalidate();
-                    
+
                 }
 
-                if (Faculty_wise.isSelected()) {
-                    
+                if (faculty_wise.isSelected()) {
+
                     String fac_Name = search_text.getText();
                     Document filter = new Document("name", fac_Name);
                     result = db.findFaculties(filter); // result have all faculty
                     setfaculty(0);
-                    if(buttons.isEmpty()){
+                    if (buttons.isEmpty()) {
                         JOptionPane.showMessageDialog(page, "No Faculty Found. Check Your Inputs.");
-                            return;
+                        return;
                     }
 
                     page.revalidate();
@@ -122,7 +119,7 @@ public class QueryPage {
         }
         buttons.clear();
         lastFac = facultyName;
-        
+
     }
 
     private void setfaculty(int index) {
@@ -155,7 +152,7 @@ public class QueryPage {
             layout.putConstraint(SpringLayout.NORTH, fac_id, 5, SpringLayout.SOUTH, last);
             page.add(fac_id);
             lastFac = facultyName;
-            
+
             facPosition = new JButton("Postions");
             facPosition.setOpaque(false);
             facPosition.setContentAreaFilled(false);
@@ -166,12 +163,11 @@ public class QueryPage {
             layout.putConstraint(SpringLayout.NORTH, facPosition, 5, SpringLayout.SOUTH, last);
             page.add(facPosition);
 
-            facultyName.addActionListener(new ActionListener(){
+            facultyName.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    
+
                 }
             });
-
 
         }
         int i = index;
@@ -183,7 +179,13 @@ public class QueryPage {
             facName.setContentAreaFilled(false);
             facName.setBorderPainted(false);
             facName.setForeground(Color.BLUE);
-            facName.setActionCommand(temp.getString("name"));
+            facName.setActionCommand(i + "");
+            facName.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    FacultyPageView facultyPageView = new FacultyPageView(result.get(Integer.parseInt(e.getActionCommand())));
+                    setActivity(facultyPageView.page);
+                }
+            });
 
             JButton depId = new JButton(temp.getString("d_id"));
             depId.setOpaque(false);
@@ -191,6 +193,13 @@ public class QueryPage {
             depId.setBorderPainted(false);
             depId.setForeground(Color.BLUE);
             depId.setActionCommand(temp.getString("d_id"));
+            depId.addActionListener(new ActionListener() {
+                public void actionPerformed(ActionEvent e) {
+                    search_text.setText(e.getActionCommand());
+                    department_wise.setSelected(true);
+                    searchButton.doClick();
+                }
+            });
 
             JButton facId = new JButton(temp.getString("f_id"));
             facId.setOpaque(false);
