@@ -4,6 +4,7 @@ import static com.sid.ActivityMain.db;
 import static com.sid.ActivityMain.setActivity;
 
 import java.awt.event.ActionEvent;
+import java.awt.*;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
@@ -15,7 +16,14 @@ import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 
 public class LoginPage {
-    public JPanel page = new JPanel();
+    public JPanel page = new JPanel() {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public Dimension getPreferredSize() {
+            return new Dimension(5000, 5000);
+        }
+    };
     SpringLayout layout = new SpringLayout();
     public static JButton loginButton;
     public LoginPage() {
@@ -52,7 +60,7 @@ public class LoginPage {
                         setActivity(facultyPage.page);
                     }
                 } else {
-                    JOptionPane.showMessageDialog(page, "Incorrect login credentials i.e. ID or password!");
+                    JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Incorrect login credentials i.e. ID or password!");
                 }
             }
         });

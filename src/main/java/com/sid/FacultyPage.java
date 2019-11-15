@@ -6,6 +6,7 @@ import static com.sid.ActivityMain.setActivity;
 import static com.sid.LoginPage.loginButton;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -35,7 +36,14 @@ import javax.swing.SpringLayout;
 import org.bson.Document;
 
 public class FacultyPage {
-    public JPanel page = new JPanel();
+    public JPanel page = new JPanel() {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public Dimension getPreferredSize() {
+            return new Dimension(5000, 5000);
+        }
+    };
     SpringLayout layout;
     public static Document facDoc;
     public static JButton leaveButton, searchButton, logoutButton;
@@ -343,7 +351,7 @@ public class FacultyPage {
             layout.putConstraint(SpringLayout.NORTH, deleteButton, 5, SpringLayout.SOUTH, lastArea);
             deleteButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    int result = JOptionPane.showConfirmDialog(page, "Are you sure you want to delete this field?",
+                    int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, "Are you sure you want to delete this field?",
                             "Warning", JOptionPane.YES_NO_OPTION);
                     if (result == JOptionPane.YES_OPTION) {
                         Document doc = ((Document) facDoc.get("extra"));
@@ -387,11 +395,11 @@ public class FacultyPage {
         addDetailFac.add(new JLabel("Details: *", JLabel.LEFT));
         addDetailFac.add(aboutMe);
 
-        int result = JOptionPane.showConfirmDialog(page, addDetailFac, "Please enter the followings",
+        int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, addDetailFac, "Please enter the followings",
                 JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
             if (newHeading.getText().isEmpty() || newDetails.getText().isEmpty())
-                JOptionPane.showMessageDialog(page, "All the fields must be Filled. Try Again");
+                JOptionPane.showMessageDialog(ActivityMain.mainFrame, "All the fields must be Filled. Try Again");
             else {
                 Document extras = (Document) facDoc.get("extra");
                 extras.put(newHeading.getText(), newDetails.getText());
@@ -454,13 +462,13 @@ public class FacultyPage {
         editFac.add(male);
         editFac.add(female);
 
-        int result = JOptionPane.showConfirmDialog(page, editFac, "Please enter the followings",
+        int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, editFac, "Please enter the followings",
                 JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
             if (textAboutMe.getText().isEmpty() || textSkillset.getText().isEmpty() || textOffice.getText().isEmpty()
                     || phone.getText().isEmpty() || email.getText().isEmpty() || birth.getText().isEmpty()
                     || textAdd.getText().isEmpty() || (!male.isSelected() && !female.isSelected()))
-                JOptionPane.showMessageDialog(page, "All the fields must be Filled. Try Again");
+                JOptionPane.showMessageDialog(ActivityMain.mainFrame, "All the fields must be Filled. Try Again");
             else {
                 Document extras = (Document) facDoc.get("extra");
                 extras.put("About Me", textAboutMe.getText());

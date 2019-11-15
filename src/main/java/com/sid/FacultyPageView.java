@@ -3,7 +3,7 @@ package com.sid;
 import static com.sid.ActivityMain.depts;
 import static com.sid.ActivityMain.setActivity;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,7 +23,14 @@ import javax.swing.SpringLayout;
 import org.bson.Document;
 
 public class FacultyPageView {
-    public JPanel page = new JPanel();
+    public JPanel page = new JPanel() {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public Dimension getPreferredSize() {
+            return new Dimension(5000, 5000);
+        }
+    };
     SpringLayout layout;
     public static Document facDoc;
     public JButton backButton;

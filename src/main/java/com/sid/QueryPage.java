@@ -3,7 +3,7 @@ package com.sid;
 import static com.sid.ActivityMain.db;
 import static com.sid.ActivityMain.setActivity;
 
-import java.awt.Color;
+import java.awt.*;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,13 +21,20 @@ import javax.swing.SpringLayout;
 import org.bson.Document;
 
 public class QueryPage {
-    public JPanel page = new JPanel();
+    public JPanel page = new JPanel() {
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public Dimension getPreferredSize() {
+            return new Dimension(5000, 5000);
+        }
+    };
     SpringLayout layout = new SpringLayout();
     List<Document> result;
     JButton lastFac = null;
     public static Document Info;
     JRadioButton last = null;
-    JButton facultyName, deptName, fac_id, facPosition;
+    JButton facultyName, deptName, fac_id, facPosition, status;
     JButton backButton;
     List<JButton> buttons = new ArrayList<>();
     JTextField search_text;
@@ -81,7 +88,7 @@ public class QueryPage {
         searchButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (search_text.getText().isEmpty() || (!faculty_wise.isSelected() && !department_wise.isSelected())) {
-                    JOptionPane.showMessageDialog(page, "Fields cannot be empty");
+                    JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Fields cannot be empty");
                     return;
                 }
                 if (!buttons.isEmpty())
@@ -103,7 +110,7 @@ public class QueryPage {
                     result = db.findFaculties(filter); // result have all faculty
                     setfaculty(0);
                     if (buttons.isEmpty()) {
-                        JOptionPane.showMessageDialog(page, "No Faculty Found. Check Your Inputs.");
+                        JOptionPane.showMessageDialog(ActivityMain.mainFrame, "No Faculty Found. Check Your Inputs.");
                         return;
                     }
 
@@ -163,6 +170,15 @@ public class QueryPage {
             layout.putConstraint(SpringLayout.NORTH, facPosition, 5, SpringLayout.SOUTH, last);
             page.add(facPosition);
 
+            status = new JButton("Status");
+            status.setOpaque(false);
+            status.setContentAreaFilled(false);
+            status.setBorderPainted(false);
+            status.setFont(new Font(status.getFont().getName(), Font.BOLD, status.getFont().getSize() + 5));
+            layout.putConstraint(SpringLayout.WEST, status, 5, SpringLayout.EAST, facPosition);
+            layout.putConstraint(SpringLayout.NORTH, status, 5, SpringLayout.SOUTH, last);
+            page.add(status);
+
             facultyName.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
 
@@ -182,7 +198,8 @@ public class QueryPage {
             facName.setActionCommand(i + "");
             facName.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    FacultyPageView facultyPageView = new FacultyPageView(result.get(Integer.parseInt(e.getActionCommand())));
+                    FacultyPageView facultyPageView = new FacultyPageView(
+                            result.get(Integer.parseInt(e.getActionCommand())));
                     setActivity(facultyPageView.page);
                 }
             });
@@ -215,6 +232,13 @@ public class QueryPage {
             facpos.setForeground(Color.BLUE);
             facpos.setActionCommand(temp.getString("f_id"));
 
+            JButton e_status = new JButton(
+                    ((Document) ((Document) temp.get("extra")).get("Work")).getString("Employee Status"));
+            e_status.setOpaque(false);
+            e_status.setContentAreaFilled(false);
+            e_status.setBorderPainted(false);
+            e_status.setForeground(Color.BLUE);
+
             layout.putConstraint(SpringLayout.WEST, facName, 5, SpringLayout.WEST, page);
             layout.putConstraint(SpringLayout.NORTH, facName, 5, SpringLayout.SOUTH, lastFac);
 
@@ -227,15 +251,20 @@ public class QueryPage {
             layout.putConstraint(SpringLayout.WEST, facpos, 5, SpringLayout.EAST, fac_id);
             layout.putConstraint(SpringLayout.NORTH, facpos, 5, SpringLayout.SOUTH, lastFac);
 
+            layout.putConstraint(SpringLayout.WEST, e_status, 5, SpringLayout.EAST, facPosition);
+            layout.putConstraint(SpringLayout.NORTH, e_status, 5, SpringLayout.SOUTH, lastFac);
+
             lastFac = facName;
             buttons.add(facName);
             buttons.add(depId);
             buttons.add(facId);
             buttons.add(facpos);
+            buttons.add(e_status);
             page.add(facName);
             page.add(depId);
             page.add(facId);
             page.add(facpos);
+            page.add(e_status);
         }
         page.revalidate();
         page.repaint();

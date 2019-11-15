@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - Main",
+            "request": "launch",
+            "mainClass": "com.sid.Main",
+            "projectName": "DBMS"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - CreatePostgres",
             "request": "launch",
             "mainClass": "com.sid.CreatePostgres",

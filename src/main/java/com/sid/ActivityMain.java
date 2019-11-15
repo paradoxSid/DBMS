@@ -1,22 +1,26 @@
 package com.sid;
 
-import java.awt.GridLayout;
+import java.awt.*;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 import org.bson.Document;;
 
 public class ActivityMain {
-    static JFrame mainFrame;
+    public static JFrame mainFrame;
     static ConnectToDB db;
     static ConnectToPostgres leavesDb;
-    static Stack<JPanel> stActivities;
+    static Stack<JScrollPane> stActivities;
     static List<Document> depts;
+    public static HashMap<String, Document> routes;
     static DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
 
     public static void main(String[] args) {
@@ -32,9 +36,14 @@ public class ActivityMain {
         db = new ConnectToDB();
         depts = db.findAllDepartments();
         leavesDb = new ConnectToPostgres();
+        try {
+            routes = leavesDb.getAllRoutes();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         LoginPage loginPage = new LoginPage();
         setActivity(loginPage.page);
-        
+
         mainFrame.setVisible(true);
     }
 
@@ -42,8 +51,11 @@ public class ActivityMain {
         if (!stActivities.empty())
             mainFrame.remove(stActivities.peek());
         if (nActivity != null) {
-            mainFrame.add(nActivity);
-            stActivities.push(nActivity);
+            JScrollPane scrollPane = new JScrollPane(nActivity, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            scrollPane.getVerticalScrollBar().setUnitIncrement(50);
+            mainFrame.add(scrollPane);
+            stActivities.push(scrollPane);
         } else {
             stActivities.pop();
             mainFrame.add(stActivities.peek());

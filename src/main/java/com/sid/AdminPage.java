@@ -5,6 +5,7 @@ import static com.sid.ActivityMain.depts;
 import static com.sid.ActivityMain.setActivity;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -33,6 +34,7 @@ public class AdminPage {
     public static List<Document> allFaculties;
     public static HashMap<String, List<Document>> faculties;
     JButton addDepartmentButton;
+    JButton routeButton;
     JButton searchButton;
     JButton logoutButton;
     JButton lastDept = null;
@@ -47,7 +49,14 @@ public class AdminPage {
     JButton ccfEdit = new JButton("Edit");
 
     public AdminPage() {
-        page = new JPanel();
+        page = new JPanel() {
+            private static final long serialVersionUID = 1L;
+    
+            @Override
+            public Dimension getPreferredSize() {
+                return new Dimension(5000, 5000);
+            }
+        };
         layout = new SpringLayout();
         page.setLayout(layout);
 
@@ -59,6 +68,7 @@ public class AdminPage {
             e1.printStackTrace();
         }
         searchButton.setText("Search");
+        routeButton = new JButton("Leave Routes");
 
         addDepartmentButton = new JButton("Add department");
         logoutButton = new JButton("Log Out");
@@ -79,7 +89,10 @@ public class AdminPage {
         layout.putConstraint(SpringLayout.WEST, addDepartmentButton, 5, SpringLayout.WEST, page);
         layout.putConstraint(SpringLayout.NORTH, addDepartmentButton, 5, SpringLayout.NORTH, page);
 
-        layout.putConstraint(SpringLayout.WEST, searchButton, 5, SpringLayout.EAST, addDepartmentButton);
+        layout.putConstraint(SpringLayout.WEST, routeButton, 5, SpringLayout.EAST, addDepartmentButton);
+        layout.putConstraint(SpringLayout.NORTH, routeButton, 5, SpringLayout.NORTH, page);
+
+        layout.putConstraint(SpringLayout.WEST, searchButton, 5, SpringLayout.EAST, routeButton);
         layout.putConstraint(SpringLayout.NORTH, searchButton, 5, SpringLayout.NORTH, page);
 
         layout.putConstraint(SpringLayout.WEST, logoutButton, 5, SpringLayout.EAST, searchButton);
@@ -97,7 +110,7 @@ public class AdminPage {
                 newDept.add(new JLabel("HOD ID: *"));
                 newDept.add(hod);
 
-                int result = JOptionPane.showConfirmDialog(page, newDept, "Please enter the followings",
+                int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, newDept, "Please enter the followings",
                         JOptionPane.OK_CANCEL_OPTION);
                 if (result == JOptionPane.OK_OPTION) {
                     String newDeptHod = hod.getText();
@@ -107,7 +120,7 @@ public class AdminPage {
                             temp = doc;
                     }
                     if (deptName.getText().isEmpty() || newDeptHod.isEmpty())
-                        JOptionPane.showMessageDialog(page, "All the fields must be Filled. Try Again");
+                        JOptionPane.showMessageDialog(ActivityMain.mainFrame, "All the fields must be Filled. Try Again");
                     else if (temp == null) {
                         JTextField facName = new JTextField(5);
                         JTextField password = new JTextField(5);
@@ -119,11 +132,11 @@ public class AdminPage {
                         newFac.add(new JLabel("Password: *"));
                         newFac.add(password);
 
-                        int result1 = JOptionPane.showConfirmDialog(page, newFac, "Please enter the followings",
+                        int result1 = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, newFac, "Please enter the followings",
                                 JOptionPane.OK_CANCEL_OPTION);
                         if (result1 == JOptionPane.OK_OPTION) {
                             if (facName.getText().isEmpty() || password.getText().isEmpty())
-                                JOptionPane.showMessageDialog(page, "All the fields must be Filled. Try Again");
+                                JOptionPane.showMessageDialog(ActivityMain.mainFrame, "All the fields must be Filled. Try Again");
                             else {
                                 Document insertedFac = db.addNewFaculty(hod.getText(), password.getText(),
                                         facName.getText(), deptName.getText(), "HOD");
@@ -149,8 +162,15 @@ public class AdminPage {
                         depts.add(inserted);
                         setDepartmentNames(depts.size() - 1);
                     } else
-                        JOptionPane.showMessageDialog(page, "Invalid HOD. Try Again");
+                        JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Invalid HOD. Try Again");
                 }
+            }
+        });
+
+        routeButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                RoutePage routePage = new RoutePage();
+                setActivity(routePage.page);
             }
         });
 
@@ -169,6 +189,7 @@ public class AdminPage {
         });
 
         page.add(addDepartmentButton);
+        page.add(routeButton);
         page.add(searchButton);
         page.add(logoutButton);
     }
@@ -250,7 +271,7 @@ public class AdminPage {
                     newfac.add(new JLabel("Faculty Id: *"));
                     newfac.add(fac_id);
 
-                    int result = JOptionPane.showConfirmDialog(page, newfac, "Please enter the followings",
+                    int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, newfac, "Please enter the followings",
                             JOptionPane.OK_CANCEL_OPTION);
                     if (result == JOptionPane.OK_OPTION) {
                         String hod_id = fac_id.getText();
@@ -307,9 +328,9 @@ public class AdminPage {
                             logoutButton.doClick();
                             LoginPage.loginButton.doClick();
                         } else if (!flag)
-                            JOptionPane.showMessageDialog(page, "Entered faculty is alredy having some position.");
+                            JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Entered faculty is alredy having some position.");
                         else
-                            JOptionPane.showMessageDialog(page,
+                            JOptionPane.showMessageDialog(ActivityMain.mainFrame,
                                     "No faculty with id " + fac_id.getText() + " found in any department.");
                     }
 
@@ -350,11 +371,11 @@ public class AdminPage {
         newDept.add(id);
         newDept.add(new JLabel("Password: *"));
         newDept.add(pwd);
-        int result = JOptionPane.showConfirmDialog(page, newDept, "Enter Details of " + position,
+        int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, newDept, "Enter Details of " + position,
                 JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
             if (name.getText().isEmpty() || id.getText().isEmpty() || pwd.getText().isEmpty())
-                JOptionPane.showMessageDialog(page, "All the fields must be Filled. Try Again");
+                JOptionPane.showMessageDialog(ActivityMain.mainFrame, "All the fields must be Filled. Try Again");
             else {
                 Document insertedFac = db.addNewFaculty(id.getText(), pwd.getText(), name.getText(), "CCF", position);
                 if (allFaculties == null) {
@@ -476,7 +497,7 @@ public class AdminPage {
                     newfac.add(new JLabel("Faculty Id: *"));
                     newfac.add(fac_id);
 
-                    int result = JOptionPane.showConfirmDialog(page, newfac, "Please enter the followings",
+                    int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, newfac, "Please enter the followings",
                             JOptionPane.OK_CANCEL_OPTION);
                     if (result == JOptionPane.OK_OPTION) {
                         String hod_id = fac_id.getText();
@@ -529,9 +550,9 @@ public class AdminPage {
                                 logoutButton.doClick();
                                 LoginPage.loginButton.doClick();
                             } else
-                                JOptionPane.showMessageDialog(page, "Entered faculty is alredy having some position.");
+                                JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Entered faculty is alredy having some position.");
                         } else
-                            JOptionPane.showMessageDialog(page, "No faculty with id " + fac_id.getText() + " found in "
+                            JOptionPane.showMessageDialog(ActivityMain.mainFrame, "No faculty with id " + fac_id.getText() + " found in "
                                     + e.getActionCommand() + ".");
                     }
                 }
@@ -539,7 +560,7 @@ public class AdminPage {
 
             removeDept.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    if (JOptionPane.showConfirmDialog(page,
+                    if (JOptionPane.showConfirmDialog(ActivityMain.mainFrame,
                             "Are you sure you want to delete " + e.getActionCommand() + " department?", "WARNING",
                             JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
                         if (faculties.get(e.getActionCommand()) == null
@@ -557,7 +578,7 @@ public class AdminPage {
                             logoutButton.doClick();
                             LoginPage.loginButton.doClick();
                         } else {
-                            JOptionPane.showMessageDialog(page, "Unable to delete " + e.getActionCommand()
+                            JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Unable to delete " + e.getActionCommand()
                                     + " department. Please delete all the faculties in it first.");
                         }
                     } else {
