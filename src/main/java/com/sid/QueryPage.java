@@ -253,7 +253,7 @@ public class QueryPage {
 
             layout.putConstraint(SpringLayout.WEST, e_status, 5, SpringLayout.EAST, facPosition);
             layout.putConstraint(SpringLayout.NORTH, e_status, 5, SpringLayout.SOUTH, lastFac);
-
+/*sujit bhadwa hai*/
             lastFac = facName;
             buttons.add(facName);
             buttons.add(depId);
