@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
@@ -95,25 +96,24 @@ public class QueryPage {
                     removeLastSearchResult();
                 if (department_wise.isSelected()) {
                     String dep_Name = search_text.getText();
-                    Document filter = new Document("d_id", dep_Name);
+                    Document filter = new Document("d_id", Pattern.compile("^(?i)" + dep_Name.toLowerCase()));
                     result = db.findFaculties(filter); // result have all faculty
                     setfaculty(0);
-
+                    if (buttons.isEmpty()) {
+                        JOptionPane.showMessageDialog(ActivityMain.mainFrame, "No Department Found. Check Your Inputs.");
+                        return;
+                    }
                     page.revalidate();
-
                 }
-
                 if (faculty_wise.isSelected()) {
-
                     String fac_Name = search_text.getText();
-                    Document filter = new Document("name", fac_Name);
+                    Document filter = new Document("name", Pattern.compile("^(?i)" + fac_Name.toLowerCase()));
                     result = db.findFaculties(filter); // result have all faculty
                     setfaculty(0);
                     if (buttons.isEmpty()) {
                         JOptionPane.showMessageDialog(ActivityMain.mainFrame, "No Faculty Found. Check Your Inputs.");
                         return;
                     }
-
                     page.revalidate();
                 }
             }
@@ -253,7 +253,7 @@ public class QueryPage {
 
             layout.putConstraint(SpringLayout.WEST, e_status, 5, SpringLayout.EAST, facPosition);
             layout.putConstraint(SpringLayout.NORTH, e_status, 5, SpringLayout.SOUTH, lastFac);
-/*sujit bhadwa hai*/
+            /* sujit bhadwa hai */
             lastFac = facName;
             buttons.add(facName);
             buttons.add(depId);

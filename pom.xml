@@ -41,6 +41,11 @@
       <artifactId>mybatis</artifactId>
       <version>3.4.5</version>
     </dependency>
+    <dependency>
+        <groupId>no.tornado.databinding</groupId>
+        <artifactId>jxdatepicker-support</artifactId>
+        <version>1.0</version>
+    </dependency>
 
   </dependencies>
 </project>

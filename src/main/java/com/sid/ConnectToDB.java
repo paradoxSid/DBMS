@@ -16,6 +16,7 @@ import org.bson.Document;
 
 public class ConnectToDB {
     private static String log = "ConnectToDb: ";
+    private static MongoClient mongo;
     MongoDatabase database;
     MongoCollection<Document> collectionFaculty;
     MongoCollection<Document> collectionDepartment;
@@ -31,7 +32,7 @@ public class ConnectToDB {
         // "sid".toCharArray());
         // print("Connected user: " + userName + "\nTo dateabase: " + dbName);
         MongoClientURI uri = new MongoClientURI("mongodb://sid:sid@localhost/?authSource=FacultyProject");
-        MongoClient mongo = new MongoClient(uri);
+        mongo = new MongoClient(uri);
         // Accessing the database
         database = mongo.getDatabase("FacultyProject");
 
@@ -42,6 +43,10 @@ public class ConnectToDB {
         Calendar date = Calendar.getInstance();
         if(date.get(Calendar.MONTH) == 0 && date.get(Calendar.DATE) == 1)
             resetLeaves(date.get(Calendar.YEAR));
+    }
+
+    public void closeMongo(){
+        mongo.close();
     }
 
     public boolean checkValidUser(String id, String pwd) {

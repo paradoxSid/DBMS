@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +35,7 @@ public class AdminPage {
     public static List<Document> allFaculties;
     public static HashMap<String, List<Document>> faculties;
     JButton addDepartmentButton;
+    JButton addNewCCFButton;
     JButton routeButton;
     JButton searchButton;
     JButton logoutButton;
@@ -43,6 +45,7 @@ public class AdminPage {
     JButton hod = new JButton("HOD");
     JButton deleteDept = new JButton("Delete");
 
+    JButton ccfPositionNumber = new JButton("H.No.");
     JButton ccfPosition = new JButton("Position");
     JButton ccfName = new JButton("Name");
     JButton ccfId = new JButton("Id");
@@ -51,7 +54,7 @@ public class AdminPage {
     public AdminPage() {
         page = new JPanel() {
             private static final long serialVersionUID = 1L;
-    
+
             @Override
             public Dimension getPreferredSize() {
                 return new Dimension(5000, 5000);
@@ -71,6 +74,8 @@ public class AdminPage {
         routeButton = new JButton("Leave Routes");
 
         addDepartmentButton = new JButton("Add department");
+        addNewCCFButton = new JButton("Add New CCF");
+
         logoutButton = new JButton("Log Out");
         logoutButton.setOpaque(false);
         logoutButton.setContentAreaFilled(false);
@@ -80,6 +85,7 @@ public class AdminPage {
         allFaculties = db.findAllFaculty();
         distributeFaculties(allFaculties);
         if (depts.isEmpty()) {
+            // createJOptionPane();
             addCCF("Director");
         }
         lastCCF = addDepartmentButton;
@@ -89,7 +95,10 @@ public class AdminPage {
         layout.putConstraint(SpringLayout.WEST, addDepartmentButton, 5, SpringLayout.WEST, page);
         layout.putConstraint(SpringLayout.NORTH, addDepartmentButton, 5, SpringLayout.NORTH, page);
 
-        layout.putConstraint(SpringLayout.WEST, routeButton, 5, SpringLayout.EAST, addDepartmentButton);
+        layout.putConstraint(SpringLayout.WEST, addNewCCFButton, 5, SpringLayout.EAST, addDepartmentButton);
+        layout.putConstraint(SpringLayout.NORTH, addNewCCFButton, 5, SpringLayout.NORTH, page);
+
+        layout.putConstraint(SpringLayout.WEST, routeButton, 5, SpringLayout.EAST, addNewCCFButton);
         layout.putConstraint(SpringLayout.NORTH, routeButton, 5, SpringLayout.NORTH, page);
 
         layout.putConstraint(SpringLayout.WEST, searchButton, 5, SpringLayout.EAST, routeButton);
@@ -110,8 +119,8 @@ public class AdminPage {
                 newDept.add(new JLabel("HOD ID: *"));
                 newDept.add(hod);
 
-                int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, newDept, "Please enter the followings",
-                        JOptionPane.OK_CANCEL_OPTION);
+                int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, newDept,
+                        "Please enter the followings", JOptionPane.OK_CANCEL_OPTION);
                 if (result == JOptionPane.OK_OPTION) {
                     String newDeptHod = hod.getText();
                     Document temp = null;
@@ -120,7 +129,8 @@ public class AdminPage {
                             temp = doc;
                     }
                     if (deptName.getText().isEmpty() || newDeptHod.isEmpty())
-                        JOptionPane.showMessageDialog(ActivityMain.mainFrame, "All the fields must be Filled. Try Again");
+                        JOptionPane.showMessageDialog(ActivityMain.mainFrame,
+                                "All the fields must be Filled. Try Again");
                     else if (temp == null) {
                         JTextField facName = new JTextField(5);
                         JTextField password = new JTextField(5);
@@ -132,11 +142,12 @@ public class AdminPage {
                         newFac.add(new JLabel("Password: *"));
                         newFac.add(password);
 
-                        int result1 = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, newFac, "Please enter the followings",
-                                JOptionPane.OK_CANCEL_OPTION);
+                        int result1 = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, newFac,
+                                "Please enter the followings", JOptionPane.OK_CANCEL_OPTION);
                         if (result1 == JOptionPane.OK_OPTION) {
                             if (facName.getText().isEmpty() || password.getText().isEmpty())
-                                JOptionPane.showMessageDialog(ActivityMain.mainFrame, "All the fields must be Filled. Try Again");
+                                JOptionPane.showMessageDialog(ActivityMain.mainFrame,
+                                        "All the fields must be Filled. Try Again");
                             else {
                                 Document insertedFac = db.addNewFaculty(hod.getText(), password.getText(),
                                         facName.getText(), deptName.getText(), "HOD");
@@ -167,6 +178,37 @@ public class AdminPage {
             }
         });
 
+        addNewCCFButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                JTextField posName = new JTextField();
+
+                JPanel newCCFName = new JPanel();
+                newCCFName.setLayout(new BoxLayout(newCCFName, BoxLayout.PAGE_AXIS));
+                newCCFName.add(new JLabel("Position Name"));
+                newCCFName.add(posName);
+
+                int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, newCCFName,
+                        "Please enter the followings", JOptionPane.OK_CANCEL_OPTION);
+                if (result == JOptionPane.OK_OPTION) {
+                    if (posName.getText().isEmpty())
+                        JOptionPane.showMessageDialog(ActivityMain.mainFrame,
+                                "All the fields must be Filled. Try Again");
+                    else {
+                        Document temp = null;
+                        for (Document doc : faculties.get("CCF")) {
+                            if (doc.getString("position").equals(posName.getText())) {
+                                temp = doc;
+                                JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Position Already exist");
+                            }
+                        }
+                        if (temp == null)
+                            addCCF(posName.getText());
+                    }
+                }
+
+            }
+        });
+
         routeButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 RoutePage routePage = new RoutePage();
@@ -189,17 +231,98 @@ public class AdminPage {
         });
 
         page.add(addDepartmentButton);
+        page.add(addNewCCFButton);
         page.add(routeButton);
         page.add(searchButton);
         page.add(logoutButton);
     }
 
+    /*
+     * List<JTextField> positionTextFields = new ArrayList<>(); List<JRadioButton>
+     * yesRadioButtons = new ArrayList<>(); JPanel newPositionsPanel = new JPanel();
+     * JButton addPositionButton = new JButton("ADD"); int numberOfPos = 1;
+     * 
+     * private void createJOptionPane() { newPositionsPanel.setLayout(new
+     * BoxLayout(newPositionsPanel, BoxLayout.PAGE_AXIS));
+     * 
+     * JPanel temp1 = new JPanel(); temp1.setLayout(new BoxLayout(temp1,
+     * BoxLayout.X_AXIS));
+     * 
+     * JLabel posNum = new JLabel("S.No."); posNum.setMaximumSize(new Dimension(50,
+     * LoginPage.loginButton.getHeight())); temp1.add(posNum); JLabel posName = new
+     * JLabel("Position Name"); posName.setMaximumSize(new Dimension(400,
+     * LoginPage.loginButton.getHeight())); temp1.add(posName); JLabel posDep = new
+     * JLabel("Department"); posDep.setMaximumSize(new Dimension(150,
+     * LoginPage.loginButton.getHeight())); temp1.add(posDep);
+     * newPositionsPanel.add(temp1);
+     * 
+     * addPositionButton.addActionListener(new ActionListener() { public void
+     * actionPerformed(ActionEvent e) { JPanel temp = new JPanel();
+     * temp.setLayout(new BoxLayout(temp, BoxLayout.X_AXIS));
+     * 
+     * JLabel number = new JLabel(numberOfPos++ + "."); number.setMaximumSize(new
+     * Dimension(50, LoginPage.loginButton.getHeight())); temp.add(number);
+     * 
+     * JTextField positionText = new JTextField(5); positionText.setMaximumSize(new
+     * Dimension(400, LoginPage.loginButton.getHeight()));
+     * positionTextFields.add(positionText); temp.add(positionText);
+     * 
+     * JRadioButton yes = new JRadioButton("Yes"); yes.setMaximumSize(new
+     * Dimension(75, LoginPage.loginButton.getHeight())); yesRadioButtons.add(yes);
+     * temp.add(yes);
+     * 
+     * JRadioButton no = new JRadioButton("No"); no.setMaximumSize(new Dimension(75,
+     * LoginPage.loginButton.getHeight())); no.setSelected(true); temp.add(no);
+     * 
+     * ButtonGroup bg = new ButtonGroup(); bg.add(yes); bg.add(no);
+     * 
+     * newPositionsPanel.remove(addPositionButton); newPositionsPanel.add(temp);
+     * newPositionsPanel.add(new JLabel(" "));
+     * newPositionsPanel.add(addPositionButton); newPositionsPanel.add(new
+     * JLabel(" ")); newPositionsPanel.repaint(); newPositionsPanel.revalidate(); }
+     * });
+     * 
+     * newPositionsPanel.add(addPositionButton); addPositionButton.doClick();
+     * newPositionsPanel.setPreferredSize(new Dimension(600, 800));
+     * newPositionsPanel.setVisible(true);
+     * 
+     * Object[] options = { "Add all", "Cancel" }; int result =
+     * JOptionPane.showOptionDialog(ActivityMain.mainFrame, newPositionsPanel,
+     * "Please enter the followings", JOptionPane.YES_NO_OPTION,
+     * JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
+     * 
+     * if (result == JOptionPane.YES_OPTION) { for(int i = 0; i <
+     * positionTextFields.size(); i++){
+     * 
+     * } } else { } }
+     */
+
+    private void setDefaultLeaveRoutes() {
+        try {
+            ActivityMain.leavesDb.addNewRoute(1, "Director", "Director", "Director");
+            ActivityMain.leavesDb.addNewRoute(2, "Dean", "Dean", "Director");
+            ActivityMain.leavesDb.addNewRoute(3, "Associative Dean", "Dean", "Director");
+            ActivityMain.leavesDb.addNewRoute(4, "HOD", "Dean", "Director");
+            ActivityMain.leavesDb.addNewRoute(5, "Faculty", "HOD", "Dean");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void setCCF() {
+        ccfPositionNumber.setOpaque(false);
+        ccfPositionNumber.setContentAreaFilled(false);
+        ccfPositionNumber.setBorderPainted(false);
+        ccfPositionNumber.setFont(new Font(dept.getFont().getName(), Font.BOLD, dept.getFont().getSize() + 5));
+        layout.putConstraint(SpringLayout.WEST, ccfPositionNumber, 5, SpringLayout.WEST, page);
+        layout.putConstraint(SpringLayout.NORTH, ccfPositionNumber, 5, SpringLayout.SOUTH, addDepartmentButton);
+        page.add(ccfPositionNumber);
+
         ccfPosition.setOpaque(false);
         ccfPosition.setContentAreaFilled(false);
         ccfPosition.setBorderPainted(false);
         ccfPosition.setFont(new Font(dept.getFont().getName(), Font.BOLD, dept.getFont().getSize() + 5));
-        layout.putConstraint(SpringLayout.WEST, ccfPosition, 5, SpringLayout.WEST, page);
+        layout.putConstraint(SpringLayout.WEST, ccfPosition, 5, SpringLayout.EAST, ccfPositionNumber);
         layout.putConstraint(SpringLayout.NORTH, ccfPosition, 5, SpringLayout.SOUTH, addDepartmentButton);
         page.add(ccfPosition);
 
@@ -229,7 +352,8 @@ public class AdminPage {
 
         lastCCF = ccfPosition;
         for (Document doc : faculties.get("CCF")) {
-
+            JButton positionNum = new JButton(
+                    ActivityMain.routes.get(doc.getString("position")).getInteger("hno") + "");
             JButton position = new JButton(doc.getString("position"));
             JButton name = new JButton(doc.getString("name"));
             JButton id = new JButton(doc.getString("f_id"));
@@ -240,6 +364,11 @@ public class AdminPage {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+            positionNum.setOpaque(false);
+            positionNum.setContentAreaFilled(false);
+            positionNum.setBorderPainted(false);
+            positionNum.setForeground(Color.BLUE);
 
             position.setOpaque(false);
             position.setContentAreaFilled(false);
@@ -271,8 +400,8 @@ public class AdminPage {
                     newfac.add(new JLabel("Faculty Id: *"));
                     newfac.add(fac_id);
 
-                    int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, newfac, "Please enter the followings",
-                            JOptionPane.OK_CANCEL_OPTION);
+                    int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, newfac,
+                            "Please enter the followings", JOptionPane.OK_CANCEL_OPTION);
                     if (result == JOptionPane.OK_OPTION) {
                         String hod_id = fac_id.getText();
 
@@ -328,7 +457,8 @@ public class AdminPage {
                             logoutButton.doClick();
                             LoginPage.loginButton.doClick();
                         } else if (!flag)
-                            JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Entered faculty is alredy having some position.");
+                            JOptionPane.showMessageDialog(ActivityMain.mainFrame,
+                                    "Entered faculty is alredy having some position.");
                         else
                             JOptionPane.showMessageDialog(ActivityMain.mainFrame,
                                     "No faculty with id " + fac_id.getText() + " found in any department.");
@@ -338,7 +468,10 @@ public class AdminPage {
 
             });
 
-            layout.putConstraint(SpringLayout.WEST, position, 5, SpringLayout.WEST, page);
+            layout.putConstraint(SpringLayout.WEST, positionNum, 5, SpringLayout.WEST, page);
+            layout.putConstraint(SpringLayout.NORTH, positionNum, 5, SpringLayout.SOUTH, lastCCF);
+
+            layout.putConstraint(SpringLayout.WEST, position, 5, SpringLayout.EAST, ccfPositionNumber);
             layout.putConstraint(SpringLayout.NORTH, position, 5, SpringLayout.SOUTH, lastCCF);
 
             layout.putConstraint(SpringLayout.WEST, name, 5, SpringLayout.EAST, ccfPosition);
@@ -350,6 +483,7 @@ public class AdminPage {
             layout.putConstraint(SpringLayout.WEST, edit, 8, SpringLayout.EAST, ccfId);
             layout.putConstraint(SpringLayout.NORTH, edit, 5, SpringLayout.SOUTH, lastCCF);
 
+            page.add(positionNum);
             page.add(position);
             page.add(name);
             page.add(id);
@@ -387,22 +521,27 @@ public class AdminPage {
                     faculties.put("CCF", new ArrayList<Document>());
                 faculties.get("CCF").add(insertedFac);
                 if (position.equals("Director")) {
+                    setDefaultLeaveRoutes();
                     Document insertedDept = db.addNewDepartment("CCF", "Director", id.getText());
                     depts.add(insertedDept);
                     addCCF("Dean");
-                }
-                if (position.equals("Dean")) {
+                } else if (position.equals("Dean")) {
                     Document d = depts.get(0);
                     depts.remove(d);
                     d.append("Dean", new Document("0", id.getText()));
                     db.upsertDept(d);
                     depts.add(d);
                     addCCF("Associative Dean");
-                }
-                if (position.equals("Associative Dean")) {
+                } else if (position.equals("Associative Dean")) {
                     Document d = depts.get(0);
                     depts.remove(d);
                     d.append("Associative Dean", new Document("0", id.getText()));
+                    db.upsertDept(d);
+                    depts.add(d);
+                } else {
+                    Document d = depts.get(0);
+                    depts.remove(d);
+                    d.append(position, new Document("0", id.getText()));
                     db.upsertDept(d);
                     depts.add(d);
                 }
@@ -497,8 +636,8 @@ public class AdminPage {
                     newfac.add(new JLabel("Faculty Id: *"));
                     newfac.add(fac_id);
 
-                    int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, newfac, "Please enter the followings",
-                            JOptionPane.OK_CANCEL_OPTION);
+                    int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, newfac,
+                            "Please enter the followings", JOptionPane.OK_CANCEL_OPTION);
                     if (result == JOptionPane.OK_OPTION) {
                         String hod_id = fac_id.getText();
 
@@ -550,10 +689,11 @@ public class AdminPage {
                                 logoutButton.doClick();
                                 LoginPage.loginButton.doClick();
                             } else
-                                JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Entered faculty is alredy having some position.");
+                                JOptionPane.showMessageDialog(ActivityMain.mainFrame,
+                                        "Entered faculty is alredy having some position.");
                         } else
-                            JOptionPane.showMessageDialog(ActivityMain.mainFrame, "No faculty with id " + fac_id.getText() + " found in "
-                                    + e.getActionCommand() + ".");
+                            JOptionPane.showMessageDialog(ActivityMain.mainFrame, "No faculty with id "
+                                    + fac_id.getText() + " found in " + e.getActionCommand() + ".");
                     }
                 }
             });
@@ -574,12 +714,12 @@ public class AdminPage {
                             }
                             depts.remove(temp);
                             db.deleteDepartment(e.getActionCommand());
-                            // TODO: Change this method
                             logoutButton.doClick();
                             LoginPage.loginButton.doClick();
                         } else {
-                            JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Unable to delete " + e.getActionCommand()
-                                    + " department. Please delete all the faculties in it first.");
+                            JOptionPane.showMessageDialog(ActivityMain.mainFrame,
+                                    "Unable to delete " + e.getActionCommand()
+                                            + " department. Please delete all the faculties in it first.");
                         }
                     } else {
 

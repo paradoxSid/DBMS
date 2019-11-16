@@ -10,6 +10,7 @@ CREATE TABLE allLeaves(
 );
  
 CREATE TABLE leaveRoutes(
+	hno INT NOT NULL,
 	applicant VARCHAR(20) NOT NULL,
 	auth1 VARCHAR(20) NOT NULL,
 	auth2 VARCHAR(20) NOT NULL,

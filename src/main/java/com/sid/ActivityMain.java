@@ -1,6 +1,7 @@
 package com.sid;
 
 import java.awt.*;
+import java.awt.event.*;
 import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Stack;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
@@ -28,7 +30,6 @@ public class ActivityMain {
         mainFrame.setSize(600, 800);
         mainFrame.setLocationRelativeTo(null);
         mainFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainFrame.setLayout(new GridLayout(1, 1));
 
         stActivities = new Stack<>();
@@ -45,6 +46,18 @@ public class ActivityMain {
         setActivity(loginPage.page);
 
         mainFrame.setVisible(true);
+        mainFrame.addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                int i = JOptionPane.showConfirmDialog(mainFrame, "Are you sure you want to exit the Faculty Portal?", "Exit Faculty Portal",
+                        JOptionPane.YES_NO_CANCEL_OPTION);
+                if (i == JOptionPane.YES_OPTION) {
+                    db.closeMongo();
+                    mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                }else{
+                    mainFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+                }
+            }
+        });
     }
 
     public static void setActivity(JPanel nActivity) {

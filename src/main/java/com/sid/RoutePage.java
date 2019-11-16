@@ -4,7 +4,8 @@ import static com.sid.ActivityMain.leavesDb;
 import static com.sid.ActivityMain.routes;
 import static com.sid.ActivityMain.setActivity;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -32,16 +33,17 @@ public class RoutePage {
     JButton addRouteButton;
     JButton backButton;
     JButton lastRoute = null;
+    JButton hnoHead = new JButton("H.No.");
     JButton applicantHead = new JButton("Applicant");
     JButton auth1Head = new JButton("Authentication 1");
     JButton auth2Head = new JButton("Authentication 2");
     JButton editRouteHead = new JButton("Edit");
-    String[] positions = { "Select", "Faculty", "HOD", "Dean", "Associative Dean", "Director" };
+    String[] allPositions;
 
     public RoutePage() {
         page = new JPanel() {
             private static final long serialVersionUID = 1L;
-    
+
             @Override
             public Dimension getPreferredSize() {
                 return new Dimension(5000, 5000);
@@ -50,19 +52,38 @@ public class RoutePage {
         layout = new SpringLayout();
         page.setLayout(layout);
 
+        allPositions = new String[ActivityMain.depts.get(0).size() + 1];
+        int i = 0;
+        allPositions[i++] = "Select";
+        for (String s : ActivityMain.depts.get(0).keySet()) {
+            if (s.equals("_id") || s.equals("d_id"))
+                continue;
+            allPositions[i++] = s;
+        }
+        allPositions[i++] = "HOD";
+        allPositions[i++] = "Faculty";
+
         addRouteButton = new JButton("Add Route");
         addRouteButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                JComboBox<String> newApplicant = new JComboBox<>(positions);
-                JComboBox<String> newAuth1 = new JComboBox<>(positions);
-                JComboBox<String> newAuth2 = new JComboBox<>(positions);
+                // JFormattedTextField hno = new JFormattedTextField(new
+                // NumberFormatter(NumberFormat.getInstance()));
+                JComboBox<String> hno = new JComboBox<>();
+                hno.addItem("Select");
+                for (int j = 1; j < allPositions.length; j++)
+                    hno.addItem(j + "");
+                JComboBox<String> newApplicant = new JComboBox<>(allPositions);
+                JComboBox<String> newAuth1 = new JComboBox<>(allPositions);
+                JComboBox<String> newAuth2 = new JComboBox<>(allPositions);
 
                 newApplicant.setSelectedItem("Select");
                 newAuth1.setSelectedItem("Select");
                 newAuth2.setSelectedItem("Select");
 
                 JPanel newRoute = new JPanel();
-                newRoute.setLayout(new GridLayout(6, 1));
+                newRoute.setLayout(new GridLayout(8, 1));
+                newRoute.add(new JLabel("H.No.: *"));
+                newRoute.add(hno);
                 newRoute.add(new JLabel("Applicant: *"));
                 newRoute.add(newApplicant);
                 newRoute.add(new JLabel("Authentication 1: *"));
@@ -70,13 +91,15 @@ public class RoutePage {
                 newRoute.add(new JLabel("Authentication 2: *"));
                 newRoute.add(newAuth2);
 
-                int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, newRoute, "Please enter the followings",
-                        JOptionPane.OK_CANCEL_OPTION);
+                int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, newRoute,
+                        "Please enter the followings", JOptionPane.OK_CANCEL_OPTION);
                 if (result == JOptionPane.OK_OPTION) {
-                    if (((String) newApplicant.getSelectedItem()).equals("Select")
+                    if (hno.getSelectedItem().equals("Select")
+                            || ((String) newApplicant.getSelectedItem()).equals("Select")
                             || ((String) newAuth1.getSelectedItem()).equals("Select")
                             || ((String) newAuth2.getSelectedItem()).equals("Select"))
-                        JOptionPane.showMessageDialog(ActivityMain.mainFrame, "All the fields must be Filled. Try Again");
+                        JOptionPane.showMessageDialog(ActivityMain.mainFrame,
+                                "All the fields must be Filled. Try Again");
                     else {
                         if (routes.containsKey((String) newApplicant.getSelectedItem()))
                             JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Applicant already exist.", "Error",
@@ -84,8 +107,9 @@ public class RoutePage {
                         else {
                             Document inserted = null;
                             try {
-                                inserted = leavesDb.addNewRoute((String) newApplicant.getSelectedItem(),
-                                        (String) newAuth1.getSelectedItem(), (String) newAuth2.getSelectedItem());
+                                inserted = leavesDb.addNewRoute(Integer.parseInt((String) hno.getSelectedItem()),
+                                        (String) newApplicant.getSelectedItem(), (String) newAuth1.getSelectedItem(),
+                                        (String) newAuth2.getSelectedItem());
                             } catch (SQLException e1) {
                                 e1.printStackTrace();
                             }
@@ -119,12 +143,20 @@ public class RoutePage {
 
     public void setRoutes(int index) {
         if (lastRoute == null) {
+            hnoHead.setOpaque(false);
+            hnoHead.setContentAreaFilled(false);
+            hnoHead.setBorderPainted(false);
+            hnoHead.setFont(new Font(hnoHead.getFont().getName(), Font.BOLD, hnoHead.getFont().getSize() + 5));
+            layout.putConstraint(SpringLayout.WEST, hnoHead, 5, SpringLayout.WEST, page);
+            layout.putConstraint(SpringLayout.NORTH, hnoHead, 5, SpringLayout.SOUTH, addRouteButton);
+            page.add(hnoHead);
+
             applicantHead.setOpaque(false);
             applicantHead.setContentAreaFilled(false);
             applicantHead.setBorderPainted(false);
             applicantHead.setFont(
                     new Font(applicantHead.getFont().getName(), Font.BOLD, applicantHead.getFont().getSize() + 5));
-            layout.putConstraint(SpringLayout.WEST, applicantHead, 5, SpringLayout.WEST, page);
+            layout.putConstraint(SpringLayout.WEST, applicantHead, 5, SpringLayout.EAST, hnoHead);
             layout.putConstraint(SpringLayout.NORTH, applicantHead, 5, SpringLayout.SOUTH, addRouteButton);
             page.add(applicantHead);
 
@@ -159,12 +191,21 @@ public class RoutePage {
         for (String key : keySet) {
             Document temp = routes.get(key);
 
+            JButton hNum = new JButton(temp.getInteger("hno") + "");
+            hNum.setOpaque(false);
+            hNum.setContentAreaFilled(false);
+            hNum.setBorderPainted(false);
+            hNum.setForeground(Color.BLUE);
+            layout.putConstraint(SpringLayout.WEST, hNum, 5, SpringLayout.WEST, page);
+            layout.putConstraint(SpringLayout.NORTH, hNum, 5, SpringLayout.SOUTH, lastRoute);
+            page.add(hNum);
+
             JButton applicant = new JButton(temp.getString("applicant"));
             applicant.setOpaque(false);
             applicant.setContentAreaFilled(false);
             applicant.setBorderPainted(false);
             applicant.setForeground(Color.BLUE);
-            layout.putConstraint(SpringLayout.WEST, applicant, 5, SpringLayout.WEST, page);
+            layout.putConstraint(SpringLayout.WEST, applicant, 5, SpringLayout.EAST, hNum);
             layout.putConstraint(SpringLayout.NORTH, applicant, 5, SpringLayout.SOUTH, lastRoute);
             page.add(applicant);
 
@@ -197,23 +238,30 @@ public class RoutePage {
             editRoute.setContentAreaFilled(false);
             editRoute.setBorderPainted(false);
             editRoute.setForeground(Color.BLUE);
-            editRoute.setActionCommand(
-                    temp.getString("applicant") + "!" + temp.getString("auth1") + "!" + temp.getString("auth2"));
+            editRoute.setActionCommand(temp.getInteger("hno") + "!" + temp.getString("applicant") + "!"
+                    + temp.getString("auth1") + "!" + temp.getString("auth2"));
             editRoute.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     String[] s = e.getActionCommand().split("!");
-                    String[] appli = {"Select", s[0]};
+                    String[] appli = { "Select", s[1] };
 
+                    JComboBox<String> hno = new JComboBox<>();
+                    hno.addItem("Select");
+                    for (int j = 1; j < allPositions.length; j++)
+                        hno.addItem(j + "");
                     JComboBox<String> newApplicant = new JComboBox<>(appli);
-                    JComboBox<String> newAuth1 = new JComboBox<>(positions);
-                    JComboBox<String> newAuth2 = new JComboBox<>(positions);
+                    JComboBox<String> newAuth1 = new JComboBox<>(allPositions);
+                    JComboBox<String> newAuth2 = new JComboBox<>(allPositions);
 
-                    newApplicant.setSelectedItem(s[0]);
-                    newAuth1.setSelectedItem(s[1]);
-                    newAuth2.setSelectedItem(s[2]);
+                    hno.setSelectedItem(s[0]);
+                    newApplicant.setSelectedItem(s[1]);
+                    newAuth1.setSelectedItem(s[2]);
+                    newAuth2.setSelectedItem(s[3]);
 
                     JPanel newRoute = new JPanel();
-                    newRoute.setLayout(new GridLayout(6, 1));
+                    newRoute.setLayout(new GridLayout(8, 1));
+                    newRoute.add(new JLabel("H.No.: *"));
+                    newRoute.add(hno);
                     newRoute.add(new JLabel("Applicant: *"));
                     newRoute.add(newApplicant);
                     newRoute.add(new JLabel("Authentication 1: *"));
@@ -221,18 +269,21 @@ public class RoutePage {
                     newRoute.add(new JLabel("Authentication 2: *"));
                     newRoute.add(newAuth2);
 
-                    int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, newRoute, "Please enter the followings",
-                            JOptionPane.OK_CANCEL_OPTION);
+                    int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, newRoute,
+                            "Please enter the followings", JOptionPane.OK_CANCEL_OPTION);
                     if (result == JOptionPane.OK_OPTION) {
-                        if (((String) newApplicant.getSelectedItem()).equals("Select")
+                        if (hno.getSelectedItem().equals("Select")
+                                || ((String) newApplicant.getSelectedItem()).equals("Select")
                                 || ((String) newAuth1.getSelectedItem()).equals("Select")
                                 || ((String) newAuth2.getSelectedItem()).equals("Select"))
-                            JOptionPane.showMessageDialog(ActivityMain.mainFrame, "All the fields must be Filled. Try Again");
+                            JOptionPane.showMessageDialog(ActivityMain.mainFrame,
+                                    "All the fields must be Filled. Try Again");
                         else {
                             Document inserted = null;
                             try {
-                                inserted = leavesDb.editRoute((String) newApplicant.getSelectedItem(),
-                                        (String) newAuth1.getSelectedItem(), (String) newAuth2.getSelectedItem());
+                                inserted = leavesDb.editRoute(Integer.parseInt((String) hno.getSelectedItem()),
+                                        (String) newApplicant.getSelectedItem(), (String) newAuth1.getSelectedItem(),
+                                        (String) newAuth2.getSelectedItem());
                             } catch (SQLException e1) {
                                 e1.printStackTrace();
                             }

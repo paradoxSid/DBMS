@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 
@@ -31,6 +32,7 @@ import javax.swing.JTextArea;
 import javax.swing.SpringLayout;
 
 import org.bson.Document;
+import org.jdesktop.swingx.JXDatePicker;
 
 public class LeavePage {
     public JPanel page = new JPanel() {
@@ -79,8 +81,8 @@ public class LeavePage {
                 if (canApplyForNew)
                     createJOptionPane("", "", "", null);
                 else
-                    JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Another Leave application is in process.", "Error",
-                            JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Another Leave application is in process.",
+                            "Error", JOptionPane.ERROR_MESSAGE);
             }
         });
         page.add(addButton);
@@ -106,9 +108,9 @@ public class LeavePage {
         }
         if (pendingLeaveRequest != null) {
             int totalRequest = 0;
-            if(pendingLeaveRequest.containsKey("auth1"))
+            if (pendingLeaveRequest.containsKey("auth1"))
                 totalRequest += pendingLeaveRequest.get("auth1").size();
-            if(pendingLeaveRequest.containsKey("auth2"))
+            if (pendingLeaveRequest.containsKey("auth2"))
                 totalRequest += pendingLeaveRequest.get("auth2").size();
             approveButton = new JButton("Pending Leave Requests (" + totalRequest + ")");
             layout.putConstraint(SpringLayout.WEST, approveButton, 5, SpringLayout.EAST, refreshButton);
@@ -122,48 +124,6 @@ public class LeavePage {
             page.add(approveButton);
             leftButton = approveButton;
         }
-        // if (facDoc.getString("position").equals("Dean")) {
-        // try {
-        // pendingLeaveRequest = leavesDb.leavesVisibleToDean();
-        // } catch (NumberFormatException | SQLException e1) {
-        // e1.printStackTrace();
-        // }
-        // approveButton = new JButton("Pending Leave Requests (" +
-        // pendingLeaveRequest.size() + ")");
-        // layout.putConstraint(SpringLayout.WEST, approveButton, 5, SpringLayout.EAST,
-        // refreshButton);
-        // layout.putConstraint(SpringLayout.NORTH, approveButton, 5,
-        // SpringLayout.NORTH, page);
-        // approveButton.addActionListener(new ActionListener() {
-        // public void actionPerformed(ActionEvent e) {
-        // ApproveLeavePage approveLeavePage = new ApproveLeavePage(facDoc);
-        // setActivity(approveLeavePage.page);
-        // }
-        // });
-        // page.add(approveButton);
-        // leftButton = approveButton;
-        // }
-        // if (facDoc.getString("position").equals("Director")) {
-        // try {
-        // pendingLeaveRequest = leavesDb.leavesVisibleToDirector();
-        // } catch (NumberFormatException | SQLException e1) {
-        // e1.printStackTrace();
-        // }
-        // approveButton = new JButton("Pending Leave Requests (" +
-        // pendingLeaveRequest.size() + ")");
-        // layout.putConstraint(SpringLayout.WEST, approveButton, 5, SpringLayout.EAST,
-        // refreshButton);
-        // layout.putConstraint(SpringLayout.NORTH, approveButton, 5,
-        // SpringLayout.NORTH, page);
-        // approveButton.addActionListener(new ActionListener() {
-        // public void actionPerformed(ActionEvent e) {
-        // ApproveLeavePage approveLeavePage = new ApproveLeavePage(facDoc);
-        // setActivity(approveLeavePage.page);
-        // }
-        // });
-        // page.add(approveButton);
-        // leftButton = approveButton;
-        // }
 
         backButton = new JButton("Back");
         backButton.setOpaque(false);
@@ -195,14 +155,6 @@ public class LeavePage {
         authenticate.setForeground(Color.BLUE);
         layout.putConstraint(SpringLayout.WEST, authenticate, 5, SpringLayout.EAST, NOLButton);
         layout.putConstraint(SpringLayout.NORTH, authenticate, 5, SpringLayout.NORTH, page);
-        // try {
-        // if (leavesDb.getAllLeavesToApprove(facDoc.getString("position"),
-        // facDoc.getString("f_id"),
-        // facDoc.getString("d_id")) != null)
-        // page.add(authenticate);
-        // } catch (SQLException e1) {
-        // e1.printStackTrace();
-        // }
 
         setUpLeaves(0);
     }
@@ -246,7 +198,8 @@ public class LeavePage {
             commentsHead.setOpaque(false);
             commentsHead.setContentAreaFilled(false);
             commentsHead.setBorderPainted(false);
-            commentsHead.setFont(new Font(commentsHead.getFont().getName(), Font.BOLD, commentsHead.getFont().getSize() + 5));
+            commentsHead.setFont(
+                    new Font(commentsHead.getFont().getName(), Font.BOLD, commentsHead.getFont().getSize() + 5));
             layout.putConstraint(SpringLayout.WEST, commentsHead, 5, SpringLayout.EAST, toDateHead);
             layout.putConstraint(SpringLayout.NORTH, commentsHead, 5, SpringLayout.SOUTH, addButton);
             page.add(commentsHead);
@@ -289,8 +242,8 @@ public class LeavePage {
                     JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Your leave has been Approved", "Infomation",
                             JOptionPane.INFORMATION_MESSAGE);
                 } else if (leaves.get(i).getString("status").equals("approved1Leaves")) {
-                    JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Your leave has been Approved by hod", "Infomation",
-                            JOptionPane.INFORMATION_MESSAGE);
+                    JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Your leave has been Approved by hod",
+                            "Infomation", JOptionPane.INFORMATION_MESSAGE);
                 }
                 try {
                     leavesDb.disableNotification(Integer.parseInt(leaves.get(i).getString("l_id")));
@@ -381,7 +334,8 @@ public class LeavePage {
                         commentsView.add(new JLabel(leaves.get(i).getString("auth2") + " Comments: "));
                         commentsView.add(new JLabel(leaves.get(i).getString("auth2comments")));
                     }
-                    JOptionPane.showMessageDialog(ActivityMain.mainFrame, commentsView, "Comments", JOptionPane.PLAIN_MESSAGE);
+                    JOptionPane.showMessageDialog(ActivityMain.mainFrame, commentsView, "Comments",
+                            JOptionPane.PLAIN_MESSAGE);
                 }
             });
             layout.putConstraint(SpringLayout.WEST, comments, 5, SpringLayout.EAST, toDateHead);
@@ -394,10 +348,14 @@ public class LeavePage {
             } else if (leaves.get(i).getString("status").equals("approvedLeaves")) {
                 status.setText("Approved");
             } else if (leaves.get(i).getString("status").equals("approved1Leaves")) {
-                status.setText("Wating for " + ActivityMain.routes.get(leaves.get(i).getString("applicant")).getString("auth2") + " Approval");
+                status.setText(
+                        "Wating for " + ActivityMain.routes.get(leaves.get(i).getString("applicant")).getString("auth2")
+                                + " Approval");
                 canApplyForNew = false;
             } else if (leaves.get(i).getString("status").equals("newLeaves")) {
-                status.setText("Wating for " + ActivityMain.routes.get(leaves.get(i).getString("applicant")).getString("auth1") + " Approval");
+                status.setText(
+                        "Wating for " + ActivityMain.routes.get(leaves.get(i).getString("applicant")).getString("auth1")
+                                + " Approval");
                 canApplyForNew = false;
             }
             status.setSize(1, 10);
@@ -425,7 +383,8 @@ public class LeavePage {
                 public void actionPerformed(ActionEvent e) {
                     Document levDoc = leaves.get(Integer.parseInt(e.getActionCommand()));
                     if (!levDoc.getString("status").equals("rejectedLeaves")) {
-                        JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Unable to edit.", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Unable to edit.", "Error",
+                                JOptionPane.ERROR_MESSAGE);
                         return;
                     }
                     createJOptionPane(levDoc.getString("from_date"), levDoc.getString("to_date"),
@@ -453,7 +412,8 @@ public class LeavePage {
                     Document levDoc = leaves.get(Integer.parseInt(e.getActionCommand()));
                     DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
                     if (levDoc.getString("status").equals("rejectedLeaves")) {
-                        JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Unable to withdraw.", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Unable to withdraw.", "Error",
+                                JOptionPane.ERROR_MESSAGE);
                         return;
                     }
                     int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame,
@@ -463,8 +423,8 @@ public class LeavePage {
                             leavesDb.redeemLeaves(Integer.parseInt(levDoc.getString("l_id")),
                                     levDoc.getString("status"));
                             if (levDoc.getString("status").equals("approvedLeaves")) {
-                                int nod = (int) ((df.parse(levDoc.getString("to_date")).getTime()
-                                        - df.parse(levDoc.getString("from_date")).getTime()) / 86400000 + 1);
+                                int nod = (int) numberOfDays(df.parse(levDoc.getString("from_date")),
+                                        df.parse(levDoc.getString("to_date")));
                                 facDoc.put("leaves", nod + facDoc.getInteger("leaves"));
                                 db.upsertFaculty(facDoc);
                             }
@@ -487,14 +447,22 @@ public class LeavePage {
 
     void createJOptionPane(String fDate, String tDate, String c, String oldLID) {
         DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        JFormattedTextField newFromDate = new JFormattedTextField(df);
-        JFormattedTextField newToDate = new JFormattedTextField(df);
+        JXDatePicker newFromDate = new JXDatePicker();
+        newFromDate.setDate(Calendar.getInstance().getTime());
+        newFromDate.setFormats(df);
+        JXDatePicker newToDate = new JXDatePicker();
+        newToDate.setDate(Calendar.getInstance().getTime());
+        newToDate.setFormats(df);
         JTextArea newComments = new JTextArea(15, 50);
         JScrollPane scrollPane = new JScrollPane(newComments);
 
         if (oldLID != null) {
-            newFromDate.setText(fDate);
-            newToDate.setText(tDate);
+            try {
+                newFromDate.setDate(df.parse(fDate));
+                newToDate.setDate(df.parse(tDate));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
             newComments.setText(c);
         }
 
@@ -510,48 +478,23 @@ public class LeavePage {
         int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, newFac, "Please enter the followings",
                 JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
-            if (newFromDate.getText().isEmpty() || newToDate.getText().isEmpty())
-                JOptionPane.showMessageDialog(ActivityMain.mainFrame, "* fields must be Filled. Try Again");
+            if (newFromDate.getDate().compareTo(new java.util.Date()) < 0
+                    || newToDate.getDate().compareTo(newFromDate.getDate()) < 0)
+                JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Invalid Dates. Try Again");
             else {
                 try {
-                    int nod = (int) ((df.parse(newToDate.getText()).getTime()
-                            - df.parse(newFromDate.getText()).getTime()) / 86400000 + 1);
+                    int nod = (int) numberOfDays(newFromDate.getDate(), newToDate.getDate());
                     if (nod <= facDoc.getInteger("leaves")) {
-                        int lId;
                         if (oldLID == null)
-                            lId = leavesDb.createNewLeaveEntry(Integer.parseInt(facDoc.getString("f_id")),
-                                    facDoc.getString("d_id"), Date.valueOf(newFromDate.getText()),
-                                    Date.valueOf(newToDate.getText()), newComments.getText(), 0,
+                            leavesDb.createNewLeaveEntry(Integer.parseInt(facDoc.getString("f_id")),
+                                    facDoc.getString("d_id"), Date.valueOf(df.format(newFromDate.getDate())),
+                                    Date.valueOf(df.format(newToDate.getDate())), newComments.getText(), 0,
                                     facDoc.getString("position"));
                         else
-                            lId = leavesDb.editLeaveEntry(Integer.parseInt(facDoc.getString("f_id")),
-                                    facDoc.getString("d_id"), Date.valueOf(newFromDate.getText()),
-                                    Date.valueOf(newToDate.getText()), newComments.getText(), Integer.parseInt(oldLID),
-                                    0);
-
-                        // if (facDoc.getString("position").equals("HOD"))
-                        // leavesDb.hodResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
-                        // newReason.getText(), "HOD");
-                        // else if (facDoc.getString("position").equals("Dean"))
-                        // leavesDb.hodResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
-                        // newReason.getText(), "Dean");
-                        // else if (facDoc.getString("position").equals("Associative Dean"))
-                        // leavesDb.hodResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
-                        // newReason.getText(), "ADea");
-                        // else if (facDoc.getString("position").equals("Director")) {
-                        // leavesDb.hodResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
-                        // newReason.getText(), "Head");
-                        // leavesDb.directorResponse(lId, true,
-                        // Integer.parseInt(facDoc.getString("f_id")),
-                        // newReason.getText());
-                        // }
-                        // TODO: Comments this lines after adding dean
-                        // List<Document> toRemoveTheLeave = db
-                        // .findFaculties(new Document("f_id", facDoc.getString("f_id")));
-                        // toRemoveTheLeave.get(0).put("leaves",
-                        // toRemoveTheLeave.get(0).getInteger("leaves") - nod);
-                        // db.upsertFaculty(toRemoveTheLeave.get(0));
-                        //
+                            leavesDb.editLeaveEntry(Integer.parseInt(facDoc.getString("f_id")),
+                                    facDoc.getString("d_id"), Date.valueOf(df.format(newFromDate.getDate())),
+                                    Date.valueOf(df.format(newToDate.getDate())), newComments.getText(),
+                                    Integer.parseInt(oldLID), 0);
 
                         leaves = leavesDb.getAllLeaves(Integer.parseInt(facDoc.getString("f_id")));
                         setUpLeaves(leaves.size() - 1);
@@ -571,55 +514,47 @@ public class LeavePage {
                                                     + " leaves form next year.",
                                             "Borrow Leaves", JOptionPane.YES_NO_OPTION);
                             if (result1 == JOptionPane.YES_OPTION) {
-                                int lId;
                                 if (oldLID == null)
-                                    lId = leavesDb.createNewLeaveEntry(Integer.parseInt(facDoc.getString("f_id")),
-                                            facDoc.getString("d_id"), Date.valueOf(newFromDate.getText()),
-                                            Date.valueOf(newToDate.getText()), newComments.getText(), ltb,
+                                    leavesDb.createNewLeaveEntry(Integer.parseInt(facDoc.getString("f_id")),
+                                            facDoc.getString("d_id"), Date.valueOf(df.format(newFromDate.getDate())),
+                                            Date.valueOf(df.format(newToDate.getDate())), newComments.getText(), ltb,
                                             facDoc.getString("postition"));
                                 else
-                                    lId = leavesDb.editLeaveEntry(Integer.parseInt(facDoc.getString("f_id")),
-                                            facDoc.getString("d_id"), Date.valueOf(newFromDate.getText()),
-                                            Date.valueOf(newToDate.getText()), newComments.getText(),
+                                    leavesDb.editLeaveEntry(Integer.parseInt(facDoc.getString("f_id")),
+                                            facDoc.getString("d_id"), Date.valueOf(df.format(newFromDate.getDate())),
+                                            Date.valueOf(df.format(newToDate.getDate())), newComments.getText(),
                                             Integer.parseInt(oldLID), ltb);
-
-                                // if (facDoc.getString("position").equals("HOD"))
-                                //     leavesDb.hodResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
-                                //             newReason.getText(), "HOD");
-                                // else if (facDoc.getString("position").equals("Dean"))
-                                //     leavesDb.hodResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
-                                //             newReason.getText(), "Dean");
-                                // else if (facDoc.getString("position").equals("Associative Dean"))
-                                //     leavesDb.hodResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
-                                //             newReason.getText(), "ADea");
-                                // else if (facDoc.getString("position").equals("Director")) {
-                                //     leavesDb.hodResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
-                                //             newReason.getText(), "Head");
-                                //     leavesDb.directorResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
-                                //             newReason.getText());
-                                // }
-                                // TODO: Comments this lines after adding dean
-                                // leavesDb.deanResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
-                                // newReason.getText());
-                                // List<Document> toRemoveTheLeave = db
-                                // .findFaculties(new Document("f_id", facDoc.getString("f_id")));
-                                // toRemoveTheLeave.get(0).put("leaves",
-                                // toRemoveTheLeave.get(0).getInteger("leaves") - nod);
-                                // db.upsertFaculty(toRemoveTheLeave.get(0));
-                                //
 
                                 leaves = leavesDb.getAllLeaves(Integer.parseInt(facDoc.getString("f_id")));
                                 setUpLeaves(leaves.size() - 1);
                                 JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Request Created");
                             }
                         } else
-                            JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Leave duration exceeds your limit.", "Error",
-                                    JOptionPane.ERROR_MESSAGE);
+                            JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Leave duration exceeds your limit.",
+                                    "Error", JOptionPane.ERROR_MESSAGE);
                     }
-                } catch (NumberFormatException | SQLException | ParseException e) {
+                } catch (NumberFormatException | SQLException e) {
                     e.printStackTrace();
                 }
             }
         }
     }
+
+    static long numberOfDays(java.util.Date start, java.util.Date end) {
+
+        int workingDays = 0;
+        Calendar c1 = Calendar.getInstance();
+        c1.setTime(start);
+        Calendar c2 = Calendar.getInstance();
+        c2.setTime(end);
+        while (!c1.after(c2)) {
+            int day = c1.get(Calendar.DAY_OF_WEEK);
+            if ((day != Calendar.SATURDAY) && (day != Calendar.SUNDAY))
+                workingDays++;
+            c1.add(Calendar.DATE, 1);
+        }
+        System.out.println(workingDays);
+        return workingDays;
+    }
+
 }

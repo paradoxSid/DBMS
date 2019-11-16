@@ -177,8 +177,8 @@ public class ApproveLeavePage {
             for (int i = 0; i < docList.size(); i++) {
                 int nod = 0;
                 try {
-                    nod = (int) (df.parse(docList.get(i).getString("to_date")).getTime()
-                            - df.parse(docList.get(i).getString("from_date")).getTime()) / 86400000 + 1;
+                    nod = (int) numberOfDays(df.parse(docList.get(i).getString("from_date")),
+                            df.parse(docList.get(i).getString("to_date")));
                 } catch (ParseException e1) {
                     e1.printStackTrace();
                 }
@@ -282,12 +282,15 @@ public class ApproveLeavePage {
                         if (docList.get(i).containsKey("commentsfac")) {
                             commentsView.add(new JLabel("Comments Fac: "));
                             commentsView.add(new JLabel(docList.get(i).getString("commentsfac")));
+                            commentsView.add(new JLabel(" "));
                         }
                         if (docList.get(i).containsKey("auth1comments")) {
                             commentsView.add(new JLabel(docList.get(i).getString("auth1") + " Comments: "));
                             commentsView.add(new JLabel(docList.get(i).getString("auth1comments")));
+                            commentsView.add(new JLabel(" "));
                         }
-                        JOptionPane.showMessageDialog(ActivityMain.mainFrame, commentsView, "Comments", JOptionPane.PLAIN_MESSAGE);
+                        JOptionPane.showMessageDialog(ActivityMain.mainFrame, commentsView, "Comments",
+                                JOptionPane.PLAIN_MESSAGE);
                     }
                 });
                 layout.putConstraint(SpringLayout.WEST, comments, 5, SpringLayout.EAST, toDateHead);
@@ -411,7 +414,8 @@ public class ApproveLeavePage {
         commentsHead1.setOpaque(false);
         commentsHead1.setContentAreaFilled(false);
         commentsHead1.setBorderPainted(false);
-        commentsHead1.setFont(new Font(commentsHead1.getFont().getName(), Font.BOLD, commentsHead1.getFont().getSize() + 5));
+        commentsHead1
+                .setFont(new Font(commentsHead1.getFont().getName(), Font.BOLD, commentsHead1.getFont().getSize() + 5));
         layout.putConstraint(SpringLayout.WEST, commentsHead1, 5, SpringLayout.EAST, toDateHead);
         layout.putConstraint(SpringLayout.NORTH, commentsHead1, 5, SpringLayout.SOUTH, oldLeaves);
         page.add(commentsHead1);
@@ -450,30 +454,11 @@ public class ApproveLeavePage {
         final List<Document> approvedLeaveRequest = leavesDb.getAllApprovedLeaves(facDoc.getString("d_id"),
                 new Date(new java.util.Date().getTime()), new Date(df.parse("2030-12-31").getTime()));
         for (int i = 0; i < approvedLeaveRequest.size(); i++) {
-            // int nod = 0;
-            // try {
-            // nod = (int)
-            // (df.parse(pendingLeaveRequest.get(i).getString("to_date")).getTime()
-            // - df.parse(pendingLeaveRequest.get(i).getString("from_date")).getTime()) /
-            // 86400000 + 1;
-            // } catch (ParseException e1) {
-            // e1.printStackTrace();
-            // }
-
             JButton lId = new JButton(approvedLeaveRequest.get(i).getString("l_id"));
             lId.setOpaque(false);
             lId.setContentAreaFilled(false);
             lId.setBorderPainted(false);
             lId.setForeground(Color.BLUE);
-            // lId.setActionCommand(approvedLeaveRequest.get(i).getString("l_id") + " "
-            // + approvedLeaveRequest.get(i).getString("f_id") + " " + nod);
-            // lId.addActionListener(new ActionListener() {
-            // public void actionPerformed(ActionEvent e) {
-            // String[] s = e.getActionCommand().split(" ");
-            // createJOptionPane(Integer.parseInt(s[0]), Integer.parseInt(s[1]),
-            // Integer.parseInt(s[2]));
-            // }
-            // });
             layout.putConstraint(SpringLayout.WEST, lId, 5, SpringLayout.WEST, page);
             layout.putConstraint(SpringLayout.NORTH, lId, 5, SpringLayout.SOUTH, lastLeave);
             page.add(lId);
@@ -483,16 +468,6 @@ public class ApproveLeavePage {
             dateApplied.setContentAreaFilled(false);
             dateApplied.setBorderPainted(false);
             dateApplied.setForeground(Color.BLUE);
-            // dateApplied.setActionCommand(approvedLeaveRequest.get(i).getString("l_id") +
-            // " "
-            // + approvedLeaveRequest.get(i).getString("f_id") + " " + nod);
-            // dateApplied.addActionListener(new ActionListener() {
-            // public void actionPerformed(ActionEvent e) {
-            // String[] s = e.getActionCommand().split(" ");
-            // createJOptionPane(Integer.parseInt(s[0]), Integer.parseInt(s[1]),
-            // Integer.parseInt(s[2]));
-            // }
-            // });
             layout.putConstraint(SpringLayout.WEST, dateApplied, 5, SpringLayout.EAST, lIdHead1);
             layout.putConstraint(SpringLayout.NORTH, dateApplied, 5, SpringLayout.SOUTH, lastLeave);
             page.add(dateApplied);
@@ -519,15 +494,6 @@ public class ApproveLeavePage {
             fromDate.setContentAreaFilled(false);
             fromDate.setBorderPainted(false);
             fromDate.setForeground(Color.BLUE);
-            // fromDate.setActionCommand(approvedLeaveRequest.get(i).getString("l_id") + " "
-            // + approvedLeaveRequest.get(i).getString("f_id") + " " + nod);
-            // fromDate.addActionListener(new ActionListener() {
-            // public void actionPerformed(ActionEvent e) {
-            // String[] s = e.getActionCommand().split(" ");
-            // createJOptionPane(Integer.parseInt(s[0]), Integer.parseInt(s[1]),
-            // Integer.parseInt(s[2]));
-            // }
-            // });
             layout.putConstraint(SpringLayout.WEST, fromDate, 5, SpringLayout.EAST, fIdHead1);
             layout.putConstraint(SpringLayout.NORTH, fromDate, 5, SpringLayout.SOUTH, lastLeave);
             page.add(fromDate);
@@ -537,15 +503,6 @@ public class ApproveLeavePage {
             toDate.setContentAreaFilled(false);
             toDate.setBorderPainted(false);
             toDate.setForeground(Color.BLUE);
-            // toDate.setActionCommand(approvedLeaveRequest.get(i).getString("l_id") + " "
-            // + approvedLeaveRequest.get(i).getString("f_id") + " " + nod);
-            // toDate.addActionListener(new ActionListener() {
-            // public void actionPerformed(ActionEvent e) {
-            // String[] s = e.getActionCommand().split(" ");
-            // createJOptionPane(Integer.parseInt(s[0]), Integer.parseInt(s[1]),
-            // Integer.parseInt(s[2]));
-            // }
-            // });
             layout.putConstraint(SpringLayout.WEST, toDate, 5, SpringLayout.EAST, fromDateHead1);
             layout.putConstraint(SpringLayout.NORTH, toDate, 5, SpringLayout.SOUTH, lastLeave);
             page.add(toDate);
@@ -564,16 +521,20 @@ public class ApproveLeavePage {
                     if (approvedLeaveRequest.get(i).containsKey("commentsfac")) {
                         commentsView.add(new JLabel("Applicant Comments: "));
                         commentsView.add(new JLabel(approvedLeaveRequest.get(i).getString("commentsfac")));
+                        commentsView.add(new JLabel(" "));
                     }
                     if (approvedLeaveRequest.get(i).containsKey("auth1comments")) {
                         commentsView.add(new JLabel(approvedLeaveRequest.get(i).getString("auth1") + " Comments: "));
                         commentsView.add(new JLabel(approvedLeaveRequest.get(i).getString("auth1comments")));
+                        commentsView.add(new JLabel(" "));
                     }
                     if (approvedLeaveRequest.get(i).containsKey("auth2comments")) {
                         commentsView.add(new JLabel(approvedLeaveRequest.get(i).getString("auth2") + " Comments: "));
                         commentsView.add(new JLabel(approvedLeaveRequest.get(i).getString("auth2comments")));
+                        commentsView.add(new JLabel(" "));
                     }
-                    JOptionPane.showMessageDialog(ActivityMain.mainFrame, commentsView, "Comments", JOptionPane.PLAIN_MESSAGE);
+                    JOptionPane.showMessageDialog(ActivityMain.mainFrame, commentsView, "Comments",
+                            JOptionPane.PLAIN_MESSAGE);
                 }
             });
             layout.putConstraint(SpringLayout.WEST, comments, 5, SpringLayout.EAST, toDateHead1);
@@ -589,12 +550,12 @@ public class ApproveLeavePage {
             layout.putConstraint(SpringLayout.NORTH, borrow, 5, SpringLayout.SOUTH, lastLeave);
             page.add(borrow);
 
-            JButton approvedByHOD = new JButton(approvedLeaveRequest.get(i).getString("hod_id"));
+            JButton approvedByHOD = new JButton(approvedLeaveRequest.get(i).getString("auth1id"));
             approvedByHOD.setOpaque(false);
             approvedByHOD.setContentAreaFilled(false);
             approvedByHOD.setBorderPainted(false);
             approvedByHOD.setForeground(Color.BLUE);
-            approvedByHOD.setActionCommand(approvedLeaveRequest.get(i).getString("hod_id"));
+            approvedByHOD.setActionCommand(approvedLeaveRequest.get(i).getString("auth1id"));
             approvedByHOD.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     FacultyPageView facultyPageView = new FacultyPageView(
@@ -606,12 +567,12 @@ public class ApproveLeavePage {
             layout.putConstraint(SpringLayout.NORTH, approvedByHOD, 5, SpringLayout.SOUTH, lastLeave);
             page.add(approvedByHOD);
 
-            JButton approvedByDean = new JButton(approvedLeaveRequest.get(i).getString("dean_id"));
+            JButton approvedByDean = new JButton(approvedLeaveRequest.get(i).getString("auth2id"));
             approvedByDean.setOpaque(false);
             approvedByDean.setContentAreaFilled(false);
             approvedByDean.setBorderPainted(false);
             approvedByDean.setForeground(Color.BLUE);
-            approvedByDean.setActionCommand(approvedLeaveRequest.get(i).getString("dean_id"));
+            approvedByDean.setActionCommand(approvedLeaveRequest.get(i).getString("auth2id"));
             approvedByDean.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
                     FacultyPageView facultyPageView = new FacultyPageView(
@@ -667,38 +628,13 @@ public class ApproveLeavePage {
                 if (auth.equals("auth1"))
                     leavesDb.auth1Response(lId, true, facDoc.getString("position"),
                             Integer.parseInt(facDoc.getString("f_id")), newComments.getText());
-                // if (facDoc.getString("position").equals("HOD")) {
-                // leavesDb.hodResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
-                // newReason.getText(),
-                // "HOD");
-                // TODO: Comments this lines after adding dean
-                // leavesDb.deanResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
-                // newReason.getText());
-                // List<Document> toAddTheLeave = db.findFaculties(new Document("f_id",
-                // String.valueOf(fId)));
-                // toAddTheLeave.get(0).put("leaves", toAddTheLeave.get(0).getInteger("leaves")
-                // - nod);
-                // db.upsertFaculty(toAddTheLeave.get(0));
-                //
                 else if (auth.equals("auth2")) {
                     leavesDb.auth2Response(lId, true, facDoc.getString("position"),
                             Integer.parseInt(facDoc.getString("f_id")), newComments.getText());
-                    // leavesDb.deanResponse(lId, true, Integer.parseInt(facDoc.getString("f_id")),
-                    // newReason.getText());
                     List<Document> toChangeLeaves = db.findFaculties(new Document("f_id", fId));
                     toChangeLeaves.get(0).put("leaves", toChangeLeaves.get(0).getInteger("leaves") - nod);
                     db.upsertFaculty(toChangeLeaves.get(0));
                 }
-                // } else if (facDoc.getString("position").equals("Director")) {
-                // leavesDb.directorResponse(lId, true,
-                // Integer.parseInt(facDoc.getString("f_id")),
-                // newReason.getText());
-                // List<Document> toChangeLeaves = db.findFaculties(new Document("f_id",
-                // String.valueOf(fId)));
-                // toChangeLeaves.get(0).put("leaves",
-                // toChangeLeaves.get(0).getInteger("leaves") - nod);
-                // db.upsertFaculty(toChangeLeaves.get(0));
-                // }
                 JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Approved");
             } catch (NumberFormatException | SQLException e) {
                 e.printStackTrace();
@@ -711,13 +647,26 @@ public class ApproveLeavePage {
                 if (facDoc.getString("position").equals("Dean"))
                     leavesDb.auth2Response(lId, false, facDoc.getString("position"),
                             Integer.parseInt(facDoc.getString("f_id")), newComments.getText());
-                // if (facDoc.getString("position").equals("Director"))
-                // leavesDb.deanResponse(lId, false, Integer.parseInt(facDoc.getString("f_id")),
-                // newReason.getText());
                 JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Rejected");
             } catch (NumberFormatException | SQLException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    static long numberOfDays(java.util.Date start, java.util.Date end) {
+        int workingDays = 0;
+        Calendar c1 = Calendar.getInstance();
+        c1.setTime(start);
+        Calendar c2 = Calendar.getInstance();
+        c2.setTime(end);
+        while (!c1.after(c2)) {
+            int day = c1.get(Calendar.DAY_OF_WEEK);
+            if ((day != Calendar.SATURDAY) && (day != Calendar.SUNDAY))
+                workingDays++;
+            c1.add(Calendar.DATE, 1);
+        }
+        System.out.println(workingDays);
+        return workingDays;
     }
 }

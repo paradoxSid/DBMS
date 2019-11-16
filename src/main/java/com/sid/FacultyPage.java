@@ -13,9 +13,11 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -34,6 +36,7 @@ import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 
 import org.bson.Document;
+import org.jdesktop.swingx.JXDatePicker;
 
 public class FacultyPage {
     public JPanel page = new JPanel() {
@@ -47,7 +50,6 @@ public class FacultyPage {
     SpringLayout layout;
     public static Document facDoc;
     public static JButton leaveButton, searchButton, logoutButton;
-    final DateTimeFormatter dfoFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
     JTextArea lastArea;
 
@@ -351,8 +353,8 @@ public class FacultyPage {
             layout.putConstraint(SpringLayout.NORTH, deleteButton, 5, SpringLayout.SOUTH, lastArea);
             deleteButton.addActionListener(new ActionListener() {
                 public void actionPerformed(ActionEvent e) {
-                    int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, "Are you sure you want to delete this field?",
-                            "Warning", JOptionPane.YES_NO_OPTION);
+                    int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame,
+                            "Are you sure you want to delete this field?", "Warning", JOptionPane.YES_NO_OPTION);
                     if (result == JOptionPane.YES_OPTION) {
                         Document doc = ((Document) facDoc.get("extra"));
                         doc.remove(e.getActionCommand());
@@ -420,7 +422,9 @@ public class FacultyPage {
         JScrollPane office = new JScrollPane(textOffice);
         JTextField phone = new JTextField(5);
         JTextField email = new JTextField(5);
-        JTextField birth = new JTextField(5);
+        JXDatePicker birth = new JXDatePicker();
+        birth.setDate(Calendar.getInstance().getTime());
+        birth.setFormats(df);
         JTextArea textAdd = new JTextArea(1, 50);
         JScrollPane address = new JScrollPane(textAdd);
         JRadioButton male = new JRadioButton("Male");
@@ -436,7 +440,12 @@ public class FacultyPage {
         textOffice.setText(((Document) extrasDoc.get("Work")).getString("Office"));
         phone.setText(((Document) extrasDoc.get("Personal")).getString("Mobile Phone"));
         email.setText(((Document) extrasDoc.get("Personal")).getString("Email"));
-        birth.setText(((Document) extrasDoc.get("Personal")).getString("Birth Date"));
+        try {
+            if (!((Document) extrasDoc.get("Personal")).getString("Birth Date").equals(""))
+                birth.setDate(df.parse(((Document) extrasDoc.get("Personal")).getString("Birth Date")));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
         textAdd.setText(((Document) extrasDoc.get("Personal")).getString("Address"));
         if (((Document) extrasDoc.get("Personal")).getString("Gender").equals("Male"))
             male.setSelected(true);
@@ -466,8 +475,9 @@ public class FacultyPage {
                 JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
             if (textAboutMe.getText().isEmpty() || textSkillset.getText().isEmpty() || textOffice.getText().isEmpty()
-                    || phone.getText().isEmpty() || email.getText().isEmpty() || birth.getText().isEmpty()
-                    || textAdd.getText().isEmpty() || (!male.isSelected() && !female.isSelected()))
+                    || phone.getText().isEmpty() || email.getText().isEmpty()
+                    || birth.getDate().after(new java.util.Date()) || textAdd.getText().isEmpty()
+                    || (!male.isSelected() && !female.isSelected()))
                 JOptionPane.showMessageDialog(ActivityMain.mainFrame, "All the fields must be Filled. Try Again");
             else {
                 Document extras = (Document) facDoc.get("extra");
@@ -476,7 +486,7 @@ public class FacultyPage {
                 ((Document) extras.get("Work")).put("Office", textOffice.getText());
                 ((Document) extras.get("Personal")).put("Mobile Phone", phone.getText());
                 ((Document) extras.get("Personal")).put("Email", email.getText());
-                ((Document) extras.get("Personal")).put("Birth Date", birth.getText());
+                ((Document) extras.get("Personal")).put("Birth Date", df.format(birth.getDate()));
                 ((Document) extras.get("Personal")).put("Address", textAdd.getText());
                 if (male.isSelected())
                     ((Document) extras.get("Personal")).put("Gender", "Male");

@@ -42,9 +42,9 @@ public class ConnectToPostgres {
         stmt = c.createStatement();
         HashMap<String, Document> routes = new HashMap<>();
 
-        ResultSet rs = stmt.executeQuery("SELECT * FROM leaveRoutes;");
+        ResultSet rs = stmt.executeQuery("SELECT * FROM leaveRoutes ORDER BY hno ASC;");
         while (rs.next()) {
-            Document doc = new Document().append("applicant", rs.getString("applicant"))
+            Document doc = new Document().append("hno", rs.getInt("hno")).append("applicant", rs.getString("applicant"))
                     .append("auth1", rs.getString("auth1")).append("auth2", rs.getString("auth2"));
             routes.put(rs.getString("applicant"), doc);
         }
@@ -53,25 +53,27 @@ public class ConnectToPostgres {
         return routes;
     }
 
-    public Document addNewRoute(String applicant, String auth1, String auth2) throws SQLException {
+    public Document addNewRoute(int hno, String applicant, String auth1, String auth2) throws SQLException {
         print("addNewRoute");
 
         stmt = c.createStatement();
-        Document route = new Document().append("applicant", applicant).append("auth1", auth1).append("auth2", auth2);
+        Document route = new Document().append("hno", hno).append("applicant", applicant).append("auth1", auth1)
+                .append("auth2", auth2);
 
-        stmt.executeUpdate("INSERT INTO leaveRoutes(applicant, auth1, auth2) VALUES('" + applicant + "', '" + auth1
-                + "', '" + auth2 + "');");
+        stmt.executeUpdate("INSERT INTO leaveRoutes(hno, applicant, auth1, auth2) VALUES(" + hno + ", '" + applicant
+                + "', '" + auth1 + "', '" + auth2 + "');");
 
         stmt.close();
         c.commit();
         return route;
     }
 
-    public Document editRoute(String applicant, String auth1, String auth2) throws SQLException {
+    public Document editRoute(int hno, String applicant, String auth1, String auth2) throws SQLException {
         print("editRoute");
 
         stmt = c.createStatement();
-        Document route = new Document().append("applicant", applicant).append("auth1", auth1).append("auth2", auth2);
+        Document route = new Document().append("hno", hno).append("applicant", applicant).append("auth1", auth1)
+                .append("auth2", auth2);
         // "UPDATE allLeaves SET application_status = 'newLeaves', notifyUser = true,
         // borrowleaves = "
         // + ltb + " WHERE l_id = " + oldLID + ";"
@@ -689,8 +691,7 @@ public class ConnectToPostgres {
             while (rs1.next()) {
                 Document doc = new Document().append("l_id", String.valueOf(rs1.getInt("l_id")))
                         .append("notifyUser", notifyUser).append("borrowleaves", String.valueOf(borrowleaves))
-                        .append("status", status)
-                        .append("applicant", applicant)
+                        .append("status", status).append("applicant", applicant)
                         .append("application_date", String.valueOf(rs1.getObject("application_date")))
                         .append("f_id", String.valueOf(rs1.getInt("f_id")))
                         .append("d_id", String.valueOf(rs1.getString("d_id")))
