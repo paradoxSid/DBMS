@@ -53,12 +53,19 @@ public class ConnectToPostgres {
         return routes;
     }
 
-    public Document addNewRoute(int hno, String applicant, String auth1, String auth2) throws SQLException {
+    public Document addNewRoute(int hno, int oldHno, String applicant, String auth1, String auth2) throws SQLException {
         print("addNewRoute");
 
         stmt = c.createStatement();
         Document route = new Document().append("hno", hno).append("applicant", applicant).append("auth1", auth1)
                 .append("auth2", auth2);
+
+        if (hno < oldHno)
+            stmt.executeUpdate(
+                    "UPDATE leaveRoutes SET hno = hno + 1 WHERE hno > " + (hno - 1) + " AND hno < " + oldHno + ";");
+        else if (hno > oldHno)
+            stmt.executeUpdate(
+                    "UPDATE leaveRoutes SET hno = hno - 1 WHERE hno > " + oldHno + " AND hno < " + (hno + 1) + ";");
 
         stmt.executeUpdate("INSERT INTO leaveRoutes(hno, applicant, auth1, auth2) VALUES(" + hno + ", '" + applicant
                 + "', '" + auth1 + "', '" + auth2 + "');");
@@ -68,7 +75,7 @@ public class ConnectToPostgres {
         return route;
     }
 
-    public Document editRoute(int hno, String applicant, String auth1, String auth2) throws SQLException {
+    public Document editRoute(int hno, int oldHno, String applicant, String auth1, String auth2) throws SQLException {
         print("editRoute");
 
         stmt = c.createStatement();
@@ -77,8 +84,14 @@ public class ConnectToPostgres {
         // "UPDATE allLeaves SET application_status = 'newLeaves', notifyUser = true,
         // borrowleaves = "
         // + ltb + " WHERE l_id = " + oldLID + ";"
-        stmt.executeUpdate("UPDATE leaveRoutes SET auth1 = '" + auth1 + "', auth2 = '" + auth2 + "' WHERE applicant = '"
-                + applicant + "';");
+        if (hno < oldHno)
+            stmt.executeUpdate(
+                    "UPDATE leaveRoutes SET hno = hno + 1 WHERE hno > " + (hno - 1) + " AND hno < " + oldHno + ";");
+        else if (hno > oldHno)
+            stmt.executeUpdate(
+                    "UPDATE leaveRoutes SET hno = hno - 1 WHERE hno > " + oldHno + " AND hno < " + (hno + 1) + ";");
+        stmt.executeUpdate("UPDATE leaveRoutes SET hno = " + hno + ", auth1 = '" + auth1 + "', auth2 = '" + auth2
+                + "' WHERE applicant = '" + applicant + "';");
 
         stmt.close();
         c.commit();

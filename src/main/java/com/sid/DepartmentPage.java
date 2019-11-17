@@ -300,7 +300,7 @@ public class DepartmentPage {
                         if (result == JOptionPane.OK_OPTION) {
                             if (facName.getText().isEmpty() || facDeptName.getText().isEmpty()
                                     || password.getText().isEmpty())
-                                JOptionPane.showMessageDialog(page, "All the fields must be Filled. Try Again");
+                                JOptionPane.showMessageDialog(ActivityMain.mainFrame, "All the fields must be Filled. Try Again");
                             else {
                                 if (faculties.containsKey(facDeptName.getText())) {
                                     Document temp1 = null;

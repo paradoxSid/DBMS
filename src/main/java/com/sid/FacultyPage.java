@@ -15,6 +15,8 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -49,7 +51,7 @@ public class FacultyPage {
     };
     SpringLayout layout;
     public static Document facDoc;
-    public static JButton leaveButton, searchButton, logoutButton;
+    public static JButton leaveButton, searchButton, logoutButton, refreshButton;
     final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
     JTextArea lastArea;
 
@@ -79,6 +81,21 @@ public class FacultyPage {
         layout.putConstraint(SpringLayout.WEST, logoutButton, 5, SpringLayout.EAST, searchButton);
         layout.putConstraint(SpringLayout.NORTH, logoutButton, 5, SpringLayout.NORTH, page);
         page.add(logoutButton);
+        
+        refreshButton = new JButton("Refresh");
+        layout.putConstraint(SpringLayout.WEST, refreshButton, 5, SpringLayout.EAST, logoutButton);
+        layout.putConstraint(SpringLayout.NORTH, refreshButton, 5, SpringLayout.NORTH, page);
+        refreshButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                loginButton.setVisible(false);
+                logoutButton.setVisible(false);
+                logoutButton.doClick();
+                loginButton.doClick();
+                loginButton.setVisible(true);
+                logoutButton.setVisible(true);
+            }
+        });
+        // page.add(refreshButton);
 
         setUpFacultyProfile();
 
@@ -282,6 +299,9 @@ public class FacultyPage {
             layout.putConstraint(SpringLayout.NORTH, personal2, 5, SpringLayout.SOUTH, lastArea);
             page.add(personal2);
             lastArea = personal2;
+
+            if(key.equals("Age"))
+                personal2.setText(((Document) extras.get("Personal")).getString("Age"));
         }
 
         editButton.addActionListener(new ActionListener() {
@@ -488,6 +508,10 @@ public class FacultyPage {
                 ((Document) extras.get("Personal")).put("Email", email.getText());
                 ((Document) extras.get("Personal")).put("Birth Date", df.format(birth.getDate()));
                 ((Document) extras.get("Personal")).put("Address", textAdd.getText());
+                LocalDate now = LocalDate.now();
+                LocalDate l = LocalDate.parse(((Document) extras.get("Personal")).getString("Birth Date"));
+                Period age = Period.between(l, now);
+                ((Document) extras.get("Personal")).put("Age",age.getYears() + " Years");
                 if (male.isSelected())
                     ((Document) extras.get("Personal")).put("Gender", "Male");
                 else

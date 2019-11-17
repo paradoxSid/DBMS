@@ -30,7 +30,7 @@ import org.bson.Document;
 public class RoutePage {
     public JPanel page;
     SpringLayout layout;
-    JButton addRouteButton;
+    JButton addRouteButton, refreshButton;
     JButton backButton;
     JButton lastRoute = null;
     JButton hnoHead = new JButton("H.No.");
@@ -108,12 +108,14 @@ public class RoutePage {
                             Document inserted = null;
                             try {
                                 inserted = leavesDb.addNewRoute(Integer.parseInt((String) hno.getSelectedItem()),
+                                        routes.get(newApplicant.getSelectedItem()).getInteger("hno"),
                                         (String) newApplicant.getSelectedItem(), (String) newAuth1.getSelectedItem(),
                                         (String) newAuth2.getSelectedItem());
                             } catch (SQLException e1) {
                                 e1.printStackTrace();
                             }
                             routes.put((String) newApplicant.getSelectedItem(), inserted);
+                            refreshButton.doClick();
                             // setRoutes(newApplicant.getText());
                         }
                     }
@@ -123,6 +125,21 @@ public class RoutePage {
         layout.putConstraint(SpringLayout.WEST, addRouteButton, 5, SpringLayout.WEST, page);
         layout.putConstraint(SpringLayout.NORTH, addRouteButton, 5, SpringLayout.NORTH, page);
         page.add(addRouteButton);
+
+        refreshButton = new JButton("Refresh");
+        refreshButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                AdminPage.routeButton.setVisible(false);
+                backButton.setVisible(false);
+                backButton.doClick();
+                AdminPage.routeButton.doClick();
+                AdminPage.routeButton.setVisible(true);
+                backButton.setVisible(true);
+            }
+        });
+        layout.putConstraint(SpringLayout.WEST, refreshButton, 5, SpringLayout.EAST, addRouteButton);
+        layout.putConstraint(SpringLayout.NORTH, refreshButton, 5, SpringLayout.NORTH, page);
+        page.add(refreshButton);
 
         backButton = new JButton("Back");
         backButton.setOpaque(false);
@@ -134,7 +151,7 @@ public class RoutePage {
                 setActivity(null);
             }
         });
-        layout.putConstraint(SpringLayout.WEST, backButton, 5, SpringLayout.EAST, addRouteButton);
+        layout.putConstraint(SpringLayout.WEST, backButton, 5, SpringLayout.EAST, refreshButton);
         layout.putConstraint(SpringLayout.NORTH, backButton, 5, SpringLayout.NORTH, page);
         page.add(backButton);
 
@@ -205,7 +222,7 @@ public class RoutePage {
             applicant.setContentAreaFilled(false);
             applicant.setBorderPainted(false);
             applicant.setForeground(Color.BLUE);
-            layout.putConstraint(SpringLayout.WEST, applicant, 5, SpringLayout.EAST, hNum);
+            layout.putConstraint(SpringLayout.WEST, applicant, 5, SpringLayout.EAST, hnoHead);
             layout.putConstraint(SpringLayout.NORTH, applicant, 5, SpringLayout.SOUTH, lastRoute);
             page.add(applicant);
 
@@ -279,16 +296,18 @@ public class RoutePage {
                             JOptionPane.showMessageDialog(ActivityMain.mainFrame,
                                     "All the fields must be Filled. Try Again");
                         else {
-                            Document inserted = null;
                             try {
-                                inserted = leavesDb.editRoute(Integer.parseInt((String) hno.getSelectedItem()),
+                                leavesDb.editRoute(Integer.parseInt((String) hno.getSelectedItem()),
+                                        routes.get(newApplicant.getSelectedItem()).getInteger("hno"),
                                         (String) newApplicant.getSelectedItem(), (String) newAuth1.getSelectedItem(),
                                         (String) newAuth2.getSelectedItem());
+                                routes = leavesDb.getAllRoutes();
                             } catch (SQLException e1) {
                                 e1.printStackTrace();
                             }
-                            routes.put((String) newApplicant.getSelectedItem(), inserted);
-                            // setRoutes(newApplicant.getText());
+                            refreshButton.setVisible(false);
+                            refreshButton.doClick();
+                            refreshButton.setVisible(true);
                         }
                     }
                 }

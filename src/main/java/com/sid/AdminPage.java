@@ -36,7 +36,7 @@ public class AdminPage {
     public static HashMap<String, List<Document>> faculties;
     JButton addDepartmentButton;
     JButton addNewCCFButton;
-    JButton routeButton;
+    static JButton routeButton;
     JButton searchButton;
     JButton logoutButton;
     JButton lastDept = null;
@@ -299,11 +299,11 @@ public class AdminPage {
 
     private void setDefaultLeaveRoutes() {
         try {
-            ActivityMain.leavesDb.addNewRoute(1, "Director", "Director", "Director");
-            ActivityMain.leavesDb.addNewRoute(2, "Dean", "Dean", "Director");
-            ActivityMain.leavesDb.addNewRoute(3, "Associative Dean", "Dean", "Director");
-            ActivityMain.leavesDb.addNewRoute(4, "HOD", "Dean", "Director");
-            ActivityMain.leavesDb.addNewRoute(5, "Faculty", "HOD", "Dean");
+            ActivityMain.leavesDb.addNewRoute(1, 1, "Director", "Director", "Director");
+            ActivityMain.leavesDb.addNewRoute(2, 2, "Dean", "Dean", "Director");
+            ActivityMain.leavesDb.addNewRoute(3, 3, "Associative Dean", "Dean", "Director");
+            ActivityMain.leavesDb.addNewRoute(4, 4, "HOD", "Dean", "Director");
+            ActivityMain.leavesDb.addNewRoute(5, 5, "Faculty", "HOD", "Dean");
         } catch (SQLException e) {
             e.printStackTrace();
         }

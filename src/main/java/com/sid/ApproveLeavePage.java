@@ -66,9 +66,19 @@ public class ApproveLeavePage {
         layout.putConstraint(SpringLayout.NORTH, refreshButton, 5, SpringLayout.NORTH, page);
         refreshButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                LeavePage.backButton.setVisible(false);
+                refreshButton.setVisible(false);
+                LeavePage.approveButton.setVisible(false);
+                LeavePage.refreshButton.setVisible(false);
+
                 backButton.doClick();
                 LeavePage.refreshButton.doClick();
                 LeavePage.approveButton.doClick();
+                
+                LeavePage.refreshButton.setVisible(true);
+                LeavePage.approveButton.setVisible(true);
+                LeavePage.backButton.setVisible(true);
+                refreshButton.setVisible(true);
             }
         });
         page.add(refreshButton);
@@ -639,6 +649,9 @@ public class ApproveLeavePage {
             } catch (NumberFormatException | SQLException e) {
                 e.printStackTrace();
             }
+            refreshButton.setVisible(false);
+            refreshButton.doClick();
+            refreshButton.setVisible(true);
         } else if (result == JOptionPane.NO_OPTION) {
             try {
                 if (auth.equals("auth1"))
@@ -651,6 +664,9 @@ public class ApproveLeavePage {
             } catch (NumberFormatException | SQLException e) {
                 e.printStackTrace();
             }
+            refreshButton.setVisible(false);
+            refreshButton.doClick();
+            refreshButton.setVisible(true);
         }
     }
 

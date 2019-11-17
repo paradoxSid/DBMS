@@ -47,7 +47,8 @@ public class LeavePage {
     List<Document> leaves;
     public static HashMap<String, List<Document>> pendingLeaveRequest;
     Document facDoc;
-    JButton addButton, backButton;
+    JButton addButton;
+    static JButton backButton;
     public static JButton refreshButton, approveButton;
     public static JButton authenticate = new JButton();
     JButton NOLButton = new JButton();
@@ -78,9 +79,10 @@ public class LeavePage {
         layout.putConstraint(SpringLayout.NORTH, addButton, 5, SpringLayout.NORTH, page);
         addButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                if (canApplyForNew)
+                if (canApplyForNew) {
                     createJOptionPane("", "", "", null);
-                else
+                    refreshButton.doClick();
+                } else
                     JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Another Leave application is in process.",
                             "Error", JOptionPane.ERROR_MESSAGE);
             }
@@ -92,8 +94,19 @@ public class LeavePage {
         layout.putConstraint(SpringLayout.NORTH, refreshButton, 5, SpringLayout.NORTH, page);
         refreshButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                refreshButton.setVisible(false);
+                backButton.setVisible(false);
+                FacultyPage.refreshButton.setVisible(false);
+                FacultyPage.leaveButton.setVisible(false);
+
                 backButton.doClick();
+                FacultyPage.refreshButton.doClick();
                 FacultyPage.leaveButton.doClick();
+
+                backButton.setVisible(true);
+                FacultyPage.refreshButton.setVisible(true);
+                FacultyPage.leaveButton.setVisible(true);
+                refreshButton.setVisible(true);
             }
         });
         page.add(refreshButton);
@@ -242,7 +255,9 @@ public class LeavePage {
                     JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Your leave has been Approved", "Infomation",
                             JOptionPane.INFORMATION_MESSAGE);
                 } else if (leaves.get(i).getString("status").equals("approved1Leaves")) {
-                    JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Your leave has been Approved by hod",
+                    JOptionPane.showMessageDialog(ActivityMain.mainFrame,
+                            "Your leave has been Approved by "
+                                    + ActivityMain.routes.get(leaves.get(i).getString("applicant")).getString("auth1"),
                             "Infomation", JOptionPane.INFORMATION_MESSAGE);
                 }
                 try {
@@ -389,6 +404,9 @@ public class LeavePage {
                     }
                     createJOptionPane(levDoc.getString("from_date"), levDoc.getString("to_date"),
                             levDoc.getString("commentsfac"), levDoc.getString("l_id"));
+                    refreshButton.setVisible(false);
+                    refreshButton.doClick();
+                    refreshButton.setVisible(true);
                 }
             });
             layout.putConstraint(SpringLayout.WEST, edit, 75, SpringLayout.EAST, statusHead);
@@ -428,8 +446,10 @@ public class LeavePage {
                                 facDoc.put("leaves", nod + facDoc.getInteger("leaves"));
                                 db.upsertFaculty(facDoc);
                             }
+                            FacultyPage.leaveButton.setVisible(false);
                             backButton.doClick();
                             FacultyPage.leaveButton.doClick();
+                            FacultyPage.leaveButton.setVisible(true);
                         } catch (ParseException | NumberFormatException | SQLException e1) {
                             e1.printStackTrace();
                         }
@@ -497,7 +517,7 @@ public class LeavePage {
                                     Integer.parseInt(oldLID), 0);
 
                         leaves = leavesDb.getAllLeaves(Integer.parseInt(facDoc.getString("f_id")));
-                        setUpLeaves(leaves.size() - 1);
+                        // setUpLeaves(leaves.size() - 1);
                         JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Request Created");
                     } else {
                         int ltb = 0;
@@ -526,7 +546,7 @@ public class LeavePage {
                                             Integer.parseInt(oldLID), ltb);
 
                                 leaves = leavesDb.getAllLeaves(Integer.parseInt(facDoc.getString("f_id")));
-                                setUpLeaves(leaves.size() - 1);
+                                // setUpLeaves(leaves.size() - 1);
                                 JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Request Created");
                             }
                         } else

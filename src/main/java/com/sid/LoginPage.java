@@ -25,7 +25,9 @@ public class LoginPage {
         }
     };
     SpringLayout layout = new SpringLayout();
+    JButton searchButton = new JButton("Search");
     public static JButton loginButton;
+
     public LoginPage() {
         page.setLayout(layout);
 
@@ -51,17 +53,25 @@ public class LoginPage {
         loginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 if (ActivityMain.db.checkValidUser(userText.getText(), new String(passwordText.getPassword()))) {
-                    if (userText.getText().equals("admin")){
+                    if (userText.getText().equals("admin")) {
                         AdminPage adminPage = new AdminPage();
                         setActivity(adminPage.page);
-                    }
-                    else{
+                    } else {
                         FacultyPage facultyPage = new FacultyPage(db.facultyDoc);
                         setActivity(facultyPage.page);
                     }
                 } else {
-                    JOptionPane.showMessageDialog(ActivityMain.mainFrame, "Incorrect login credentials i.e. ID or password!");
+                    JOptionPane.showMessageDialog(ActivityMain.mainFrame,
+                            "Incorrect login credentials i.e. ID or password!");
                 }
+            }
+        });
+        layout.putConstraint(SpringLayout.WEST, searchButton, 5, SpringLayout.WEST, page);
+        layout.putConstraint(SpringLayout.NORTH, searchButton, 5, SpringLayout.SOUTH, loginButton);
+        searchButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                QueryPage queryPage = new QueryPage();
+                setActivity(queryPage.page);
             }
         });
         page.add(namelabel);
@@ -69,8 +79,10 @@ public class LoginPage {
         page.add(passwordLabel);
         page.add(passwordText);
         page.add(loginButton);
+        page.add(searchButton);
         defaultLogin("1111", "1111", userText, passwordText);
     }
+
     void defaultLogin(String id, String pwd, JTextField userText, JPasswordField passwordText) {
         userText.setText(id);
         passwordText.setText(pwd);
