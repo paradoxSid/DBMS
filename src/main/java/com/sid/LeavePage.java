@@ -341,6 +341,10 @@ public class LeavePage {
                         commentsView.add(new JLabel("Applicant Comments: "));
                         commentsView.add(new JLabel(leaves.get(i).getString("commentsfac")));
                     }
+                    if (leaves.get(i).containsKey("authcomments")) {
+                        commentsView.add(new JLabel(leaves.get(i).getString("auth") + " Comments: "));
+                        commentsView.add(new JLabel(leaves.get(i).getString("authcomments")));
+                    }
                     if (leaves.get(i).containsKey("auth1comments")) {
                         commentsView.add(new JLabel(leaves.get(i).getString("auth1") + " Comments: "));
                         commentsView.add(new JLabel(leaves.get(i).getString("auth1comments")));
