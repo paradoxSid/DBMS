@@ -14,7 +14,7 @@ public class CreatePostgres {
       // To access psql from cmd in windows 'psql -U postgres postgres'
       Connection c = null;
       try {
-         c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/leaves", "postgres", "admin");
+         c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/leaves", "postgres", "four");
          System.out.println("Opened database successfully");
 
          ScriptRunner sr = new ScriptRunner(c);

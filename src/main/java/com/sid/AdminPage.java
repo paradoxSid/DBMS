@@ -94,8 +94,8 @@ public class AdminPage {
             numPanel.add(new JLabel("Max leaves for CCF"));
             numPanel.add(numText);
 
-            int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, numPanel,
-                    "Please enter the followings", JOptionPane.OK_CANCEL_OPTION);
+            int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, numPanel, "Please enter the followings",
+                    JOptionPane.OK_CANCEL_OPTION);
             if (result == JOptionPane.OK_OPTION) {
                 if (numText.getText().isEmpty())
                     JOptionPane.showMessageDialog(ActivityMain.mainFrame, "All the fields must be Filled. Try Again");
@@ -371,9 +371,7 @@ public class AdminPage {
         lastCCF = ccfPosition;
         for (Document doc : faculties.get("CCF")) {
             JButton positionNum = new JButton(
-                    ActivityMain.routes.get(
-                        doc.getString("position"))
-                        .getInteger("hno") + "");
+                    ActivityMain.routes.get(doc.getString("position")).getInteger("hno") + "");
             JButton position = new JButton(doc.getString("position"));
             JButton name = new JButton(doc.getString("name"));
             JButton id = new JButton(doc.getString("f_id"));
@@ -531,6 +529,7 @@ public class AdminPage {
             if (name.getText().isEmpty() || id.getText().isEmpty() || pwd.getText().isEmpty())
                 JOptionPane.showMessageDialog(ActivityMain.mainFrame, "All the fields must be Filled. Try Again");
             else {
+                boolean flag = false;
                 if (position.equals("Director")) {
                     setDefaultLeaveRoutes();
                     Document insertedDept = db.addNewDepartment("CCF", "Director", id.getText(), maxLeaves);
@@ -554,7 +553,15 @@ public class AdminPage {
                     depts.remove(d);
                     d.append(position, new Document("0", id.getText()));
                     db.upsertDept(d);
-                    depts.add(d);
+                    depts.add(0, d);
+                    try {
+                        ActivityMain.leavesDb.addNewRoute(faculties.get("CCF").size() + 1,
+                                faculties.get("CCF").size() + 3, position, position, position);
+                        ActivityMain.routes = ActivityMain.leavesDb.getAllRoutes();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                    flag = true;
                 }
                 Document insertedFac = db.addNewFaculty(id.getText(), pwd.getText(), name.getText(), "CCF", position);
                 if (allFaculties == null) {
@@ -565,6 +572,15 @@ public class AdminPage {
                 if (faculties.get("CCF") == null)
                     faculties.put("CCF", new ArrayList<Document>());
                 faculties.get("CCF").add(insertedFac);
+
+                if (flag) {
+                    logoutButton.setVisible(false);
+                    LoginPage.loginButton.setVisible(false);
+                    logoutButton.doClick();
+                    LoginPage.loginButton.doClick();
+                    logoutButton.setVisible(true);
+                    LoginPage.loginButton.setVisible(true);
+                }
             }
         }
 

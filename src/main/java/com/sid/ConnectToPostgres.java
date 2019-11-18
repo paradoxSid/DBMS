@@ -27,7 +27,7 @@ public class ConnectToPostgres {
 
     public ConnectToPostgres() {
         try {
-            c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/leaves", "postgres", "admin");
+            c = DriverManager.getConnection("jdbc:postgresql://localhost:5432/leaves", "postgres", "four");
             c.setAutoCommit(false);
             print("Connected");
         } catch (Exception e) {

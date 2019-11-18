@@ -80,11 +80,5 @@ public class LoginPage {
         page.add(passwordText);
         page.add(loginButton);
         page.add(searchButton);
-        defaultLogin("1111", "1111", userText, passwordText);
-    }
-
-    void defaultLogin(String id, String pwd, JTextField userText, JPasswordField passwordText) {
-        userText.setText(id);
-        passwordText.setText(pwd);
     }
 }

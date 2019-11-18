@@ -93,7 +93,7 @@ public class ConnectToDB {
 
 	public Document addNewDepartment(String name, String position, String id, int maxLeaves) {
         print("addNewDepartment CCF");
-        Document insert = new Document().append("d_id", name).append(position, new Document("0", id)).append("maxLeaves", maxLeaves);
+        Document insert = new Document().append("d_id", name).append("maxLeaves", maxLeaves).append(position, new Document("0", id));
         collectionDepartment.insertOne(insert);
         List<Document> inserted = collectionDepartment.find(insert).into(new ArrayList<Document>());
         return inserted.get(0);
