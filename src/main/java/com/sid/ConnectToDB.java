@@ -91,9 +91,9 @@ public class ConnectToDB {
         return inserted.get(0);
     }
 
-	public Document addNewDepartment(String name, String position, String id) {
+	public Document addNewDepartment(String name, String position, String id, int maxLeaves) {
         print("addNewDepartment CCF");
-        Document insert = new Document().append("d_id", name).append(position, new Document("0", id));
+        Document insert = new Document().append("d_id", name).append(position, new Document("0", id)).append("maxLeaves", maxLeaves);
         collectionDepartment.insertOne(insert);
         List<Document> inserted = collectionDepartment.find(insert).into(new ArrayList<Document>());
         return inserted.get(0);
@@ -116,7 +116,7 @@ public class ConnectToDB {
                             .append("name", name)
                             .append("d_id", dName)
                             .append("position", position)
-                            .append("leaves", 15)
+                            .append("leaves", ActivityMain.depts.get(0).getInteger("maxLeaves"))
                             .append("year", Calendar.getInstance().get(Calendar.YEAR));
         Document extra = new Document().append("About Me", "")
                             .append("Skill Set", "");
@@ -160,12 +160,12 @@ public class ConnectToDB {
         print("resetLeaves");
         Document filter = new Document().append("leaves", new Document("$gte", 0)).append("year",
                 new Document("$ne", year));
-        Document updateDoc = new Document().append("$set", new Document("leaves", 15).append("year", year));
+        Document updateDoc = new Document().append("$set", new Document("leaves", ActivityMain.depts.get(0).getInteger("maxLeaves")).append("year", year));
         collectionFaculty.updateMany(filter , updateDoc);
 
         Document filter1 = new Document().append("leaves", new Document("$lt", 0)).append("year",
                 new Document("$ne", year));
-        Document updateDoc1 = new Document().append("$inc", new Document("leaves", 15)).append("$set",
+        Document updateDoc1 = new Document().append("$inc", new Document("leaves", ActivityMain.depts.get(0).getInteger("maxLeaves"))).append("$set",
                 new Document("year", year));
         collectionFaculty.updateMany(filter1, updateDoc1);
 	}

@@ -51,6 +51,8 @@ public class AdminPage {
     JButton ccfId = new JButton("Id");
     JButton ccfEdit = new JButton("Edit");
 
+    int maxLeaves = 15;
+
     public AdminPage() {
         page = new JPanel() {
             private static final long serialVersionUID = 1L;
@@ -85,8 +87,23 @@ public class AdminPage {
         allFaculties = db.findAllFaculty();
         distributeFaculties(allFaculties);
         if (depts.isEmpty()) {
-            // createJOptionPane();
-            addCCF("Director");
+            JTextField numText = new JTextField();
+
+            JPanel numPanel = new JPanel();
+            numPanel.setLayout(new BoxLayout(numPanel, BoxLayout.PAGE_AXIS));
+            numPanel.add(new JLabel("Max leaves for CCF"));
+            numPanel.add(numText);
+
+            int result = JOptionPane.showConfirmDialog(ActivityMain.mainFrame, numPanel,
+                    "Please enter the followings", JOptionPane.OK_CANCEL_OPTION);
+            if (result == JOptionPane.OK_OPTION) {
+                if (numText.getText().isEmpty())
+                    JOptionPane.showMessageDialog(ActivityMain.mainFrame, "All the fields must be Filled. Try Again");
+                else {
+                    maxLeaves = Integer.parseInt(numText.getText());
+                    addCCF("Director");
+                }
+            }
         }
         lastCCF = addDepartmentButton;
         setCCF();
@@ -304,6 +321,7 @@ public class AdminPage {
             ActivityMain.leavesDb.addNewRoute(3, 3, "Associative Dean", "Dean", "Director");
             ActivityMain.leavesDb.addNewRoute(4, 4, "HOD", "Dean", "Director");
             ActivityMain.leavesDb.addNewRoute(5, 5, "Faculty", "HOD", "Dean");
+            ActivityMain.routes = ActivityMain.leavesDb.getAllRoutes();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -353,7 +371,9 @@ public class AdminPage {
         lastCCF = ccfPosition;
         for (Document doc : faculties.get("CCF")) {
             JButton positionNum = new JButton(
-                    ActivityMain.routes.get(doc.getString("position")).getInteger("hno") + "");
+                    ActivityMain.routes.get(
+                        doc.getString("position"))
+                        .getInteger("hno") + "");
             JButton position = new JButton(doc.getString("position"));
             JButton name = new JButton(doc.getString("name"));
             JButton id = new JButton(doc.getString("f_id"));
@@ -511,18 +531,9 @@ public class AdminPage {
             if (name.getText().isEmpty() || id.getText().isEmpty() || pwd.getText().isEmpty())
                 JOptionPane.showMessageDialog(ActivityMain.mainFrame, "All the fields must be Filled. Try Again");
             else {
-                Document insertedFac = db.addNewFaculty(id.getText(), pwd.getText(), name.getText(), "CCF", position);
-                if (allFaculties == null) {
-                    allFaculties = new ArrayList<>();
-                    distributeFaculties(allFaculties);
-                }
-                allFaculties.add(insertedFac);
-                if (faculties.get("CCF") == null)
-                    faculties.put("CCF", new ArrayList<Document>());
-                faculties.get("CCF").add(insertedFac);
                 if (position.equals("Director")) {
                     setDefaultLeaveRoutes();
-                    Document insertedDept = db.addNewDepartment("CCF", "Director", id.getText());
+                    Document insertedDept = db.addNewDepartment("CCF", "Director", id.getText(), maxLeaves);
                     depts.add(insertedDept);
                     addCCF("Dean");
                 } else if (position.equals("Dean")) {
@@ -545,6 +556,15 @@ public class AdminPage {
                     db.upsertDept(d);
                     depts.add(d);
                 }
+                Document insertedFac = db.addNewFaculty(id.getText(), pwd.getText(), name.getText(), "CCF", position);
+                if (allFaculties == null) {
+                    allFaculties = new ArrayList<>();
+                    distributeFaculties(allFaculties);
+                }
+                allFaculties.add(insertedFac);
+                if (faculties.get("CCF") == null)
+                    faculties.put("CCF", new ArrayList<Document>());
+                faculties.get("CCF").add(insertedFac);
             }
         }
 
